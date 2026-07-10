@@ -1,7 +1,7 @@
 ﻿import { useRef, useEffect } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import VideoPresenter from '../components/VideoPresenter'
+import PhoneVideoShowcase from '../components/PhoneVideoShowcase'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -54,7 +54,7 @@ export default function Presenter() {
         background: 'radial-gradient(circle, rgba(192,200,212,0.04) 0%, transparent 70%)', filter: 'blur(60px)',
       }} />
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr auto', gap: 80, alignItems: 'center' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 345px', gap: 80, alignItems: 'center' }}>
         <div ref={leftRef}>
           <p style={{ fontSize: 12, color: '#C0C8D4', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: 20, marginTop: 0 }}>
             CHI SIAMO
@@ -84,7 +84,7 @@ export default function Presenter() {
             <span style={{ fontSize: 13, color: '#445566' }}>Risposta in 2 ore</span>
           </div>
         </div>
-        <div ref={rightRef} style={{ minWidth: 340, maxWidth: 460 }}><VideoPresenter /></div>
+        <div ref={rightRef}><PhoneVideoShowcase /></div>
       </div>
     </section>
   )

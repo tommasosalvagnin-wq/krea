@@ -1,109 +1,114 @@
-import { useRef, useEffect, useState, Suspense } from 'react'
+import { useEffect, Suspense, useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { useGLTF, OrbitControls } from '@react-three/drei'
+import { useGLTF, OrbitControls, Environment, useVideoTexture } from '@react-three/drei'
 import * as THREE from 'three'
 
-/*
-  CALIBRATION — TEST PHASE (magenta plane):
-  - User confirmed: z = -0.021 puts video on CAMERA (back) side → WRONG
-  - Therefore: z = +0.021 = SCREEN (front) side
-  - DoubleSide during test to remove normal-direction ambiguity
-  - autoRotate = false so we can verify orientation with camera fixed
-  - Once position confirmed, swap color="magenta" for VideoTexture + FrontSide
-*/
+/* Canvas alphaMap con angoli arrotondati — UV mapping corretto */
+function makeRoundedAlpha(w, h, radius) {
+  const scale = 512
+  const pw = scale, ph = Math.round(scale * (h / w))
+  const canvas = document.createElement('canvas')
+  canvas.width = pw; canvas.height = ph
+  const ctx = canvas.getContext('2d')
+  const r = radius * (pw / w)
+  ctx.fillStyle = 'white'
+  ctx.beginPath()
+  ctx.moveTo(r, 0)
+  ctx.lineTo(pw - r, 0)
+  ctx.quadraticCurveTo(pw, 0,  pw, r)
+  ctx.lineTo(pw, ph - r)
+  ctx.quadraticCurveTo(pw, ph, pw - r, ph)
+  ctx.lineTo(r, ph)
+  ctx.quadraticCurveTo(0, ph,  0, ph - r)
+  ctx.lineTo(0, r)
+  ctx.quadraticCurveTo(0, 0,   r, 0)
+  ctx.closePath()
+  ctx.fill()
+  return new THREE.CanvasTexture(canvas)
+}
 
-const PLANE_W = 0.82
-const PLANE_H = 1.68
-const PLANE_X = 0
-const PLANE_Y = 0.02
-const SCREEN_Z = 0.021   // positive Z = screen side (opposite of cameras at -Z)
+/* ─── Video screen con PlaneGeometry (UV corretti) + alphaMap arrotondato ─── */
+function VideoScreen() {
+  const texture = useVideoTexture('/videos/presenter.mp4', {
+    muted: true, loop: true, start: true, crossOrigin: 'anonymous',
+  })
 
-/* ─── MagentaScreen — remove after confirming correct side ─── */
-function MagentaScreen() {
+  const alpha = useMemo(() => makeRoundedAlpha(0.88, 1.86, 0.13), [])
+
   return (
-    <mesh position={[PLANE_X, PLANE_Y, SCREEN_Z]} rotation={[0, Math.PI, 0]}>
-      <planeGeometry args={[PLANE_W, PLANE_H]} />
-      <meshBasicMaterial color="magenta" side={THREE.DoubleSide} toneMapped={false} />
+    <mesh position={[0, 0, 0.086]}>
+      <planeGeometry args={[0.88, 1.86]} />
+      <meshBasicMaterial
+        map={texture}
+        alphaMap={alpha}
+        transparent
+        side={THREE.DoubleSide}
+        toneMapped={false}
+      />
     </mesh>
   )
 }
 
-/* ─── PhoneModel ─────────────────────────────────────── */
 function PhoneModel() {
   const { scene } = useGLTF('/models/iphone-3d.glb')
 
   useEffect(() => {
     if (!scene) return
-    console.group('[Phone] Mesh list')
-    scene.traverse(o => {
-      if (!o.isMesh) return
-      const b = new THREE.Box3().setFromObject(o)
-      const s = new THREE.Vector3(); b.getSize(s)
-      console.log(`"${o.name}" pos=(${o.position.x.toFixed(3)},${o.position.y.toFixed(3)},${o.position.z.toFixed(3)}) size=${s.x.toFixed(3)}x${s.y.toFixed(3)}x${s.z.toFixed(3)}`)
+    const box = new THREE.Box3().setFromObject(scene)
+    const size = new THREE.Vector3()
+    box.getSize(size)
+    console.log('[Phone] bounding box:', {
+      W: size.x.toFixed(4),
+      H: size.y.toFixed(4),
+      D: size.z.toFixed(4),
+      minX: box.min.x.toFixed(4), maxX: box.max.x.toFixed(4),
+      minY: box.min.y.toFixed(4), maxY: box.max.y.toFixed(4),
+      minZ: box.min.z.toFixed(4), maxZ: box.max.z.toFixed(4),
     })
-    console.groupEnd()
   }, [scene])
 
   return (
     <group>
       <primitive object={scene} />
-      <MagentaScreen />
+      <Suspense fallback={null}>
+        <VideoScreen />
+      </Suspense>
     </group>
   )
 }
 
-/* ─── Static fallback ────────────────────────────────── */
-function StaticFallback() {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center' }}>
-      <div style={{
-        position: 'relative', width: 260, borderRadius: 36,
-        background: '#0d0d14', border: '2px solid rgba(255,255,255,0.12)',
-        boxShadow: '0 0 0 6px #111622,0 0 0 8px rgba(192,200,212,0.15),0 40px 80px rgba(0,0,0,0.6)',
-        overflow: 'hidden', padding: '12px 6px 10px',
-      }}>
-        <div style={{ borderRadius: 4, overflow: 'hidden', aspectRatio: '9/16', background: '#000' }}>
-          <video src="/videos/presenter.mp4" muted playsInline loop autoPlay
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ─── Main export ────────────────────────────────────── */
 export default function PhoneVideoShowcase() {
-  const [hasError, setHasError] = useState(false)
   const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 1.5) : 1
 
-  if (hasError) return <StaticFallback />
-
   return (
-    <div style={{ position: 'relative', width: 300, height: 600 }}>
+    <div style={{
+      width: '100%',
+      maxWidth: 390,
+      aspectRatio: '9 / 16',
+      borderRadius: 16,
+      overflow: 'hidden',
+      position: 'relative',
+      background: 'radial-gradient(ellipse at center, #1a1f2e 0%, #0a0a0f 70%)',
+    }}>
       <Canvas
         camera={{ position: [0, 0, 5], fov: 38 }}
         gl={{ antialias: true, alpha: true }}
         dpr={dpr}
-        style={{
-          width: '100%', height: '100%',
-          background: 'radial-gradient(ellipse at center, #1a1f2e 0%, #0a0a0f 70%)',
-          borderRadius: 12,
-        }}
-        onError={() => setHasError(true)}
+        style={{ position: 'absolute', inset: 0 }}
       >
-        <ambientLight intensity={0.9} />
+        <ambientLight intensity={1.0} />
         <directionalLight position={[3, 5, 4]}   intensity={1.8} />
         <directionalLight position={[-4, 1, -3]} intensity={0.8} color="#C0C8D4" />
-        <pointLight position={[0, 3, -5]} intensity={1.2} color="#8A9BB0" />
+        <pointLight position={[0, 3, -5]}        intensity={1.2} color="#8A9BB0" />
 
         <Suspense fallback={null}>
           <PhoneModel />
+          <Environment preset="city" />
         </Suspense>
 
-        {/* autoRotate=false during calibration — re-enable after confirming magenta is on screen side */}
         <OrbitControls
-          autoRotate={false}
-          enableRotate={true}
+          autoRotate
+          autoRotateSpeed={1.5}
           enableZoom={false}
           enablePan={false}
           minPolarAngle={Math.PI / 2.5}
