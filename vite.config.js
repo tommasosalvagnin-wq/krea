@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  base: '/krea/',
+  base: process.env.NODE_ENV === 'production' ? '/krea/' : '/',
   plugins: [react(), tailwindcss()],
   optimizeDeps: {
     include: ['three', '@react-three/fiber', '@react-three/drei', 'gsap'],
