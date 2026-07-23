@@ -64,7 +64,7 @@ export default function VideoPresenter() {
       {/* Video */}
       <video
         ref={videoRef}
-        src="/videos/presenter.mp4"
+        src={`${import.meta.env.BASE_URL}videos/presenter.mp4`}
         playsInline
         preload="metadata"
         style={{ width: '100%', display: 'block' }}

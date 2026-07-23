@@ -29,7 +29,7 @@ function makeRoundedAlpha(w, h, radius) {
 
 /* ─── Video screen con PlaneGeometry (UV corretti) + alphaMap arrotondato ─── */
 function VideoScreen() {
-  const texture = useVideoTexture('/videos/presenter.mp4', {
+  const texture = useVideoTexture(`${import.meta.env.BASE_URL}videos/presenter.mp4`, {
     muted: true, loop: true, start: true, crossOrigin: 'anonymous',
   })
 
@@ -50,7 +50,7 @@ function VideoScreen() {
 }
 
 function PhoneModel() {
-  const { scene } = useGLTF('/models/iphone-3d.glb')
+  const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/iphone-3d.glb`)
 
   useEffect(() => {
     if (!scene) return
@@ -119,4 +119,4 @@ export default function PhoneVideoShowcase() {
   )
 }
 
-useGLTF.preload('/models/iphone-3d.glb')
+useGLTF.preload(`${import.meta.env.BASE_URL}models/iphone-3d.glb`)

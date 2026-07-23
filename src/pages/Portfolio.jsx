@@ -7,7 +7,7 @@ const projects = [
     tag: 'Automotive',
     desc: 'Sito per concessionaria moto multimarca. Catalogo, filtri e schede tecniche.',
     color: '#C0A882',
-    img: '/images/motoutlet.jpg',
+    img: `${import.meta.env.BASE_URL}images/motoutlet.jpg`,
     link: 'https://motoutlet-pordenone-demo.netlify.app/',
   },
   {
@@ -16,7 +16,7 @@ const projects = [
     tag: 'Immobiliare',
     desc: 'Sito per affitti brevi con booking integrato. 4.95 stelle, 83 recensioni.',
     color: '#8A9BB0',
-    img: '/images/monolocale.jpg',
+    img: `${import.meta.env.BASE_URL}images/monolocale.jpg`,
     link: 'https://monolocale-padova-2026.netlify.app/',
   },
   {
@@ -25,7 +25,7 @@ const projects = [
     tag: 'Automotive',
     desc: 'Sito vetrina per concessionaria Mazda con video hero e form contatti.',
     color: '#9BB08A',
-    img: '/images/bisson.jpg',
+    img: `${import.meta.env.BASE_URL}images/bisson.jpg`,
     link: 'https://bisson-auto.netlify.app/',
   },
 ]
