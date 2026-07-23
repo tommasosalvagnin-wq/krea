@@ -2,6 +2,7 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import PhoneVideoShowcase from '../components/PhoneVideoShowcase'
+import { useWindowSize } from '../hooks/useWindowSize'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -32,6 +33,7 @@ export default function Presenter() {
   const sectionRef = useRef(null)
   const leftRef    = useRef(null)
   const rightRef   = useRef(null)
+  const { isMobile } = useWindowSize()
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -54,15 +56,28 @@ export default function Presenter() {
         background: 'radial-gradient(circle, rgba(192,200,212,0.04) 0%, transparent 70%)', filter: 'blur(60px)',
       }} />
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 345px', gap: 80, alignItems: 'center' }}>
-        <div ref={leftRef}>
+      <div style={{
+        maxWidth: 1100, margin: '0 auto',
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 345px',
+        gap: isMobile ? 48 : 80,
+        alignItems: 'center',
+      }}>
+        {/* Su mobile il telefono viene prima del testo */}
+        {isMobile && (
+          <div ref={rightRef} style={{ display: 'flex', justifyContent: 'center' }}>
+            <PhoneVideoShowcase />
+          </div>
+        )}
+
+        <div ref={isMobile ? null : leftRef}>
           <p style={{ fontSize: 12, color: '#C0C8D4', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: 20, marginTop: 0 }}>
             CHI SIAMO
           </p>
-          <h2 className="text-glow-title" style={{ fontSize: 'clamp(32px,4vw,52px)', fontWeight: 800, lineHeight: 1.15, margin: '0 0 20px' }}>
+          <h2 className="text-glow-title" style={{ fontSize: 'clamp(28px,6vw,52px)', fontWeight: 800, lineHeight: 1.15, margin: '0 0 20px' }}>
             Lascia che ti<br />spieghiamo tutto.
           </h2>
-          <p className="text-glow-body" style={{ fontSize: 17, lineHeight: 1.7, margin: '0 0 32px', maxWidth: 460 }}>
+          <p className="text-glow-body" style={{ fontSize: isMobile ? 15 : 17, lineHeight: 1.7, margin: '0 0 32px', maxWidth: 460 }}>
             In meno di 1 minuto capirai perche KREA e diversa da tutte le altre agenzie digitali.
           </p>
           <div style={{ marginBottom: 36 }}>
@@ -75,6 +90,7 @@ export default function Presenter() {
                 background: '#C0C8D4', color: '#000', border: 'none',
                 padding: '12px 28px', borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s',
                 textTransform: 'uppercase', letterSpacing: '0.5px', fontFamily: 'Space Grotesk, sans-serif',
+                width: isMobile ? '100%' : 'auto',
               }}
               onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
               onMouseLeave={e => e.currentTarget.style.opacity = '1'}
@@ -84,7 +100,11 @@ export default function Presenter() {
             <span style={{ fontSize: 13, color: '#445566' }}>Risposta in 2 ore</span>
           </div>
         </div>
-        <div ref={rightRef}><PhoneVideoShowcase /></div>
+
+        {/* Su desktop il telefono è a destra */}
+        {!isMobile && (
+          <div ref={rightRef}><PhoneVideoShowcase /></div>
+        )}
       </div>
     </section>
   )

@@ -11,10 +11,10 @@ export default defineConfig({
     target: 'esnext',
     rollupOptions: {
       output: {
-        manualChunks: {
-          three: ['three'],
-          r3f: ['@react-three/fiber', '@react-three/drei'],
-          gsap: ['gsap'],
+        manualChunks: (id) => {
+          if (id.includes('node_modules/three')) return 'three'
+          if (id.includes('@react-three')) return 'r3f'
+          if (id.includes('gsap')) return 'gsap'
         },
       },
     },

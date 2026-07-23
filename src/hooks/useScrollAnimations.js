@@ -51,6 +51,20 @@ export function useScrollAnimations() {
         }
       )
 
+      /* Portfolio cards stagger entrance */
+      gsap.fromTo('.dock-card',
+        { opacity: 0, y: 48, scale: 0.95 },
+        {
+          opacity: 1, y: 0, scale: 1,
+          duration: 0.65, ease: 'power2.out',
+          stagger: 0.12,
+          scrollTrigger: {
+            trigger: '.dock-card',
+            start: 'top 85%',
+          },
+        }
+      )
+
       /* Contact section */
       gsap.fromTo('.contact-inner',
         { opacity: 0, y: 40 },

@@ -1,10 +1,10 @@
-export default function LeftPanel() {
+export default function LeftPanel({ mobile = false }) {
   return (
     <div className="hero-left" style={{
-      padding: '0 48px 0 64px',
-      opacity: 0,
-      display: 'flex', flexDirection: 'column', justifyContent: 'center',
-      height: '100%',
+      padding: mobile ? '0 20px' : 'clamp(20px, 5vw, 64px) clamp(16px, 4vw, 48px)',
+      opacity: mobile ? 1 : 0,
+      display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+      height: mobile ? 'auto' : '100%',
     }}>
       {/* Badge */}
       <div style={{
@@ -12,7 +12,7 @@ export default function LeftPanel() {
         padding: '6px 14px', borderRadius: 999,
         border: '1px solid rgba(192,200,212,0.2)',
         background: 'rgba(192,200,212,0.04)',
-        width: 'fit-content', marginBottom: 28,
+        width: 'fit-content', marginBottom: mobile ? 14 : 28,
       }}>
         <span style={{
           width: 6, height: 6, borderRadius: '50%', background: '#C0C8D4',
@@ -26,7 +26,7 @@ export default function LeftPanel() {
 
       {/* Title */}
       <h1 className="text-glow-title" style={{
-        fontSize: 72, fontWeight: 900, lineHeight: 1,
+        fontSize: 'clamp(48px, 14vw, 72px)', fontWeight: 900, lineHeight: 1,
         margin: 0, marginBottom: 20,
         letterSpacing: '-2px', fontFamily: 'Syne, sans-serif',
       }}>
@@ -44,14 +44,14 @@ export default function LeftPanel() {
       {/* Description */}
       <p className="text-glow-body" style={{
         fontSize: 15, lineHeight: 1.7, fontWeight: 450,
-        marginBottom: 36, maxWidth: 340,
+        marginBottom: mobile ? 20 : 36, maxWidth: 340,
       }}>
         Trasformiamo i tuoi servizi in clienti reali. Soluzioni
         innovative, moderne e accessibili — senza spendere una fortuna.
       </p>
 
       {/* CTAs */}
-      <div style={{ display: 'flex', gap: 12 }}>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         <button
           onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
           style={{
@@ -85,7 +85,7 @@ export default function LeftPanel() {
 
       {/* Stats */}
       <div style={{
-        display: 'flex', gap: 48, marginTop: 56,
+        display: mobile ? 'none' : 'flex', gap: 'clamp(20px, 6vw, 48px)', marginTop: 'clamp(28px, 5vw, 56px)',
         paddingTop: 24, borderTop: '1px solid rgba(192,200,212,0.1)',
       }}>
         {[['60+', 'Progetti'], ['99%', 'Soddisfazione'], ['3', 'Esperti']].map(([v, l]) => (

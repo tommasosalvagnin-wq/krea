@@ -66,6 +66,7 @@ function VideoLaptop() {
         src="/videos/laptop-seekable.mp4"
         muted
         playsInline
+        autoPlay
         preload="auto"
         style={{
           width: '100%',
@@ -155,11 +156,17 @@ export default function Hero() {
 
       {/* Contenuto sopra il video — z-index 2 */}
       {isMobile ? (
-        <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', alignItems: 'flex-end', padding: '0 0 40px' }}>
-            <LeftPanel />
+        <>
+          {/* Gradiente scuro in basso per leggibilità testo */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '65%',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.6) 50%, transparent 100%)',
+            zIndex: 1, pointerEvents: 'none',
+          }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: '0 0 48px' }}>
+            <LeftPanel mobile />
           </div>
-        </div>
+        </>
       ) : isTablet ? (
         <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'flex-end', padding: '0 0 48px' }}>
           <LeftPanel /><RightPanel />

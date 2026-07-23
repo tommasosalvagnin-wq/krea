@@ -3,6 +3,7 @@ import { useScrollAnimations } from './hooks/useScrollAnimations'
 import Hero    from './pages/Hero'
 import Pricing  from './pages/Pricing'
 import Presenter       from './pages/Presenter'
+import Portfolio       from './pages/Portfolio'
 import Contact         from './pages/Contact'
 import Footer          from './pages/Footer'
 
@@ -20,6 +21,7 @@ export default function App() {
 
       <Pricing />
       <Presenter />
+      <Portfolio />
       <Contact />
       <Footer  />
     </div>

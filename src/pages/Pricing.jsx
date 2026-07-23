@@ -343,7 +343,7 @@ export default function Pricing() {
     <section id="pricing" style={{
       position: 'relative', zIndex: 20,
       background: '#0a0a0f',
-      padding: '0 40px 120px',
+      padding: '0 clamp(16px, 5vw, 40px) clamp(60px, 10vw, 120px)',
       borderTop: '1px solid rgba(192,200,212,0.06)',
     }}>
       {/* Header */}

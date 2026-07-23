@@ -9,7 +9,7 @@ export default function Footer() {
       position: 'relative', zIndex: 20,
       background: '#0a0a0f',
       borderTop: '1px solid rgba(192,200,212,0.06)',
-      padding: '80px 40px 40px',
+      padding: 'clamp(40px, 8vw, 80px) clamp(16px, 5vw, 40px) clamp(24px, 4vw, 40px)',
     }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 48, marginBottom: 64 }}>
@@ -47,12 +47,11 @@ export default function Footer() {
           <div>
             <h4 style={{ fontSize: 11, fontWeight: 700, color: '#C0C8D4', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 20, marginTop: 0 }}>Contatti</h4>
             {[
-              { icon: '📧', text: 'info@krea.digital' },
-              { icon: '📱', text: 'WhatsApp: +39 ...' },
-              { icon: '🌐', text: 'www.krea.digital' },
-            ].map(({ icon, text }) => (
-              <div key={text} style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-                <span>{icon}</span>
+              { label: 'Email', text: 'info.servizikrea@gmail.com' },
+              { label: 'WhatsApp', text: '+39 393 332 6424' },
+            ].map(({ label, text }) => (
+              <div key={label} style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 10, color: '#445566', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 2 }}>{label}</div>
                 <span style={{ fontSize: 13, color: '#6B7A8D', lineHeight: 1.5 }}>{text}</span>
               </div>
             ))}
