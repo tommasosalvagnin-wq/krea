@@ -20,7 +20,7 @@ function VideoLaptop() {
     // Preload tutti i frame; disegna subito il primo
     for (let i = 0; i < TOTAL_FRAMES; i++) {
       const img = new Image()
-      img.src = `/frames/frame_${String(i + 1).padStart(3, '0')}.jpg`
+      img.src = `${import.meta.env.BASE_URL}frames/frame_${String(i + 1).padStart(3, '0')}.jpg`
       img.onload = () => {
         frames.current[i] = img
         loaded.current++
