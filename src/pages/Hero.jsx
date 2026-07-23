@@ -5,53 +5,50 @@ import { useWindowSize } from '../hooks/useWindowSize'
 
 /* Video a tutto schermo — il laptop rimane centrato identico,
    ma lo sfondo nero del video si espande a coprire l'intera hero */
+const TOTAL_FRAMES = 193
+
 function VideoLaptop() {
-  const videoRef  = useRef(null)
-  const targetRef = useRef(0)
-  const rafRef    = useRef(null)
+  const canvasRef = useRef(null)
+  const frames = useRef(new Array(TOTAL_FRAMES).fill(null))
+  const loaded = useRef(0)
 
   useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    let rafId
 
-    const init = () => video.pause()
-    if (video.readyState >= 1) init()
-    else video.addEventListener('loadedmetadata', init, { once: true })
-
-    const onScroll = () => {
-      const progress = Math.min(window.scrollY / window.innerHeight, 1)
-      targetRef.current = progress * (video.duration || 0)
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-
-    const LERP_FAST = 0.22
-    const LERP_SLOW = 0.10
-    const JUMP_THRESHOLD = video.duration * 0.15
-
-    const tick = () => {
-      if (video.duration && video.readyState >= 2) {
-        const current = video.currentTime
-        const target  = targetRef.current
-        const diff    = target - current
-        if (Math.abs(diff) > JUMP_THRESHOLD) {
-          video.currentTime = target
-        } else if (Math.abs(diff) > 0.016) {
-          const factor = Math.abs(diff) > 0.5 ? LERP_FAST : LERP_SLOW
-          video.currentTime = current + diff * factor
+    // Preload tutti i frame; disegna subito il primo
+    for (let i = 0; i < TOTAL_FRAMES; i++) {
+      const img = new Image()
+      img.src = `/frames/frame_${String(i + 1).padStart(3, '0')}.jpg`
+      img.onload = () => {
+        frames.current[i] = img
+        loaded.current++
+        if (i === 0) {
+          canvas.width = img.naturalWidth
+          canvas.height = img.naturalHeight
+          ctx.drawImage(img, 0, 0)
         }
       }
-      rafRef.current = requestAnimationFrame(tick)
     }
-    rafRef.current = requestAnimationFrame(tick)
 
-    return () => {
-      cancelAnimationFrame(rafRef.current)
-      window.removeEventListener('scroll', onScroll)
+    // Loop rAF: swap frame istantaneo, zero decodifica video
+    let lastIdx = -1
+    const loop = () => {
+      const progress = Math.min(window.scrollY / window.innerHeight, 1)
+      const idx = Math.min(Math.round(progress * (TOTAL_FRAMES - 1)), TOTAL_FRAMES - 1)
+      if (idx !== lastIdx && frames.current[idx]) {
+        ctx.drawImage(frames.current[idx], 0, 0)
+        lastIdx = idx
+      }
+      rafId = requestAnimationFrame(loop)
     }
+    rafId = requestAnimationFrame(loop)
+
+    return () => cancelAnimationFrame(rafId)
   }, [])
 
   return (
-    /* Contenitore a tutto schermo — z-index 0, sotto il contenuto */
     <div style={{
       position: 'absolute',
       top: 0, left: 0,
@@ -61,21 +58,14 @@ function VideoLaptop() {
       background: '#000',
       overflow: 'hidden',
     }}>
-      <video
-        ref={videoRef}
-        src="/videos/laptop-seekable.mp4"
-        muted
-        playsInline
-        autoPlay
-        preload="auto"
+      <canvas
+        ref={canvasRef}
         style={{
           width: '100%',
           height: '100%',
-          objectFit: 'contain',
-          objectPosition: 'center center',
+          objectFit: 'cover',
           display: 'block',
           pointerEvents: 'none',
-          userSelect: 'none',
         }}
       />
     </div>
