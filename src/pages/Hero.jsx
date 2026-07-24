@@ -6,6 +6,9 @@ import { useWindowSize } from '../hooks/useWindowSize'
 /* Video a tutto schermo — il laptop rimane centrato identico,
    ma lo sfondo nero del video si espande a coprire l'intera hero */
 const TOTAL_FRAMES = 193
+// Misurato una volta sola al load — non cambia se la barra del browser si nasconde
+const INITIAL_VH = window.innerHeight
+const MOBILE_ANIM_VH = INITIAL_VH * 2 // animazione su 2 viewport di scroll
 
 function VideoLaptop() {
   const canvasRef = useRef(null)
@@ -17,35 +20,64 @@ function VideoLaptop() {
     const ctx = canvas.getContext('2d')
     let rafId
 
-    // Preload tutti i frame; disegna subito il primo
+    const isMobile = () => window.innerWidth < 768
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    const drawFrame = (img) => {
+      const cw = canvas.width, ch = canvas.height
+      const iw = img.naturalWidth, ih = img.naturalHeight
+      ctx.clearRect(0, 0, cw, ch)
+
+      if (isMobile()) {
+        // Sfondo navy che matcha il video — niente barre nere visibili
+        ctx.fillStyle = '#08111f'
+        ctx.fillRect(0, 0, cw, ch)
+        // Laptop in contain con margine laterale per non uscire dai bordi
+        const scale = Math.min((cw * 0.92) / iw, ch / ih)
+        const x = (cw - iw * scale) / 2
+        const y = ch * 0.02
+        ctx.drawImage(img, x, y, iw * scale, ih * scale)
+      } else {
+        const scale = Math.max(cw / iw, ch / ih)
+        const x = (cw - iw * scale) / 2
+        const y = (ch - ih * scale) / 2
+        ctx.drawImage(img, x, y, iw * scale, ih * scale)
+      }
+    }
+
     for (let i = 0; i < TOTAL_FRAMES; i++) {
       const img = new Image()
       img.src = `${import.meta.env.BASE_URL}frames/frame_${String(i + 1).padStart(3, '0')}.jpg`
       img.onload = () => {
         frames.current[i] = img
         loaded.current++
-        if (i === 0) {
-          canvas.width = img.naturalWidth
-          canvas.height = img.naturalHeight
-          ctx.drawImage(img, 0, 0)
-        }
+        if (i === 0) drawFrame(img)
       }
     }
 
-    // Loop rAF: swap frame istantaneo, zero decodifica video
     let lastIdx = -1
     const loop = () => {
-      const progress = Math.min(window.scrollY / window.innerHeight, 1)
+      const scrollRange = isMobile() ? MOBILE_ANIM_VH : INITIAL_VH
+      const progress = Math.min(window.scrollY / scrollRange, 1)
       const idx = Math.min(Math.round(progress * (TOTAL_FRAMES - 1)), TOTAL_FRAMES - 1)
-      if (idx !== lastIdx && frames.current[idx]) {
-        ctx.drawImage(frames.current[idx], 0, 0)
+      if (frames.current[idx] && (idx !== lastIdx || canvas.width !== canvas.offsetWidth)) {
+        drawFrame(frames.current[idx])
         lastIdx = idx
       }
       rafId = requestAnimationFrame(loop)
     }
     rafId = requestAnimationFrame(loop)
 
-    return () => cancelAnimationFrame(rafId)
+    return () => {
+      cancelAnimationFrame(rafId)
+      window.removeEventListener('resize', resize)
+    }
   }, [])
 
   return (
@@ -63,7 +95,6 @@ function VideoLaptop() {
         style={{
           width: '100%',
           height: '100%',
-          objectFit: 'cover',
           display: 'block',
           pointerEvents: 'none',
         }}
@@ -127,11 +158,22 @@ function ProgressBar() {
 
 export default function Hero() {
   const { isMobile, isTablet } = useWindowSize()
+  const wrapperRef = useRef(null)
+
+  useEffect(() => {
+    if (!wrapperRef.current) return
+    // wrapper = animazione (2*VH) + sezione (1*VH) = 3*VH
+    // calcolato con INITIAL_VH per matchare esattamente il loop JS
+    wrapperRef.current.style.height = isMobile
+      ? `${INITIAL_VH * 3}px`
+      : `${INITIAL_VH}px`
+  }, [isMobile])
 
   return (
+    <div ref={wrapperRef} style={{ height: isMobile ? `${INITIAL_VH * 3}px` : '100vh' }}>
     <section id="hero" style={{
       position: 'sticky', top: 0,
-      height: '100vh', width: '100%',
+      height: `${INITIAL_VH}px`, width: '100%',
       background: '#000',
       overflow: 'hidden', zIndex: 10,
     }}>
@@ -147,13 +189,13 @@ export default function Hero() {
       {/* Contenuto sopra il video — z-index 2 */}
       {isMobile ? (
         <>
-          {/* Gradiente scuro in basso per leggibilità testo */}
           <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, height: '65%',
-            background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.6) 50%, transparent 100%)',
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.7) 50%, transparent 100%)',
             zIndex: 1, pointerEvents: 'none',
           }} />
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: '0 0 48px' }}>
+          {/* Testo posizionato subito sotto il laptop (top ~30%) */}
+          <div style={{ position: 'absolute', top: '32%', left: 0, right: 0, zIndex: 2, padding: '0 24px' }}>
             <LeftPanel mobile />
           </div>
         </>
@@ -177,5 +219,6 @@ export default function Hero() {
       <ScrollHint />
       <ProgressBar />
     </section>
+    </div>
   )
 }
