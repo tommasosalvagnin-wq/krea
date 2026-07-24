@@ -34,11 +34,21 @@ function VideoLaptop() {
       const iw = img.naturalWidth, ih = img.naturalHeight
       ctx.clearRect(0, 0, cw, ch)
 
-      // Cover centrato su tutti i device — il background del video riempie tutto
-      const scale = Math.max(cw / iw, ch / ih)
-      const x = (cw - iw * scale) / 2
-      const y = (ch - ih * scale) / 2
-      ctx.drawImage(img, x, y, iw * scale, ih * scale)
+      if (isMobile()) {
+        // Sfondo navy che matcha il video — niente barre nere visibili
+        ctx.fillStyle = '#08111f'
+        ctx.fillRect(0, 0, cw, ch)
+        // Laptop in contain con margine laterale per non uscire dai bordi
+        const scale = Math.min((cw * 0.92) / iw, ch / ih)
+        const x = (cw - iw * scale) / 2
+        const y = ch * 0.02
+        ctx.drawImage(img, x, y, iw * scale, ih * scale)
+      } else {
+        const scale = Math.max(cw / iw, ch / ih)
+        const x = (cw - iw * scale) / 2
+        const y = (ch - ih * scale) / 2
+        ctx.drawImage(img, x, y, iw * scale, ih * scale)
+      }
     }
 
     for (let i = 0; i < TOTAL_FRAMES; i++) {
@@ -180,12 +190,12 @@ export default function Hero() {
       {isMobile ? (
         <>
           <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
-            background: 'linear-gradient(to top, rgba(8,17,31,0.98) 0%, rgba(8,17,31,0.85) 40%, transparent 100%)',
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%',
+            background: 'linear-gradient(to top, rgba(8,17,31,0.99) 0%, rgba(8,17,31,0.75) 45%, transparent 100%)',
             zIndex: 1, pointerEvents: 'none',
           }} />
-          {/* Testo in basso — laptop libero al centro */}
-          <div style={{ position: 'absolute', bottom: '10%', left: 0, right: 0, zIndex: 2, padding: '0 24px' }}>
+          {/* Testo posizionato subito sotto il laptop (top ~30%) */}
+          <div style={{ position: 'absolute', top: '32%', left: 0, right: 0, zIndex: 2, padding: '0 24px' }}>
             <LeftPanel mobile />
           </div>
         </>
