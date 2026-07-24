@@ -87,7 +87,7 @@ function VideoLaptop() {
       width: '100%',
       height: '100%',
       zIndex: 0,
-      background: '#000',
+      background: '#08111f',
       overflow: 'hidden',
     }}>
       <canvas
@@ -174,7 +174,7 @@ export default function Hero() {
     <section id="hero" style={{
       position: 'sticky', top: 0,
       height: `${INITIAL_VH}px`, width: '100%',
-      background: '#000',
+      background: '#08111f',
       overflow: 'hidden', zIndex: 10,
     }}>
       {/* Video a tutto schermo — z-index 0 */}
@@ -191,7 +191,7 @@ export default function Hero() {
         <>
           <div style={{
             position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%',
-            background: 'linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.7) 50%, transparent 100%)',
+            background: 'linear-gradient(to top, rgba(8,17,31,0.99) 0%, rgba(8,17,31,0.75) 45%, transparent 100%)',
             zIndex: 1, pointerEvents: 'none',
           }} />
           {/* Testo posizionato subito sotto il laptop (top ~30%) */}
