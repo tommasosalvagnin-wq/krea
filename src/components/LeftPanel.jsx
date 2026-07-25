@@ -34,12 +34,23 @@ export default function LeftPanel({ mobile = false }) {
       </h1>
 
       {/* Subtitle label */}
-      <p className="text-glow-body" style={{
-        fontSize: 13, fontWeight: 600, color: '#C0C8D4',
-        marginBottom: 24, letterSpacing: '0.2em', textTransform: 'uppercase',
-      }}>
-        Web 3D · Video Hyperealistici · Menu Digitali
-      </p>
+      {mobile ? (
+        <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {['Web 3D', 'Video Hyperealistici', 'Menu Digitali'].map(s => (
+            <span key={s} className="text-glow-body" style={{
+              fontSize: 11, fontWeight: 600, color: '#C0C8D4',
+              letterSpacing: '0.18em', textTransform: 'uppercase',
+            }}>{s}</span>
+          ))}
+        </div>
+      ) : (
+        <p className="text-glow-body" style={{
+          fontSize: 13, fontWeight: 600, color: '#C0C8D4',
+          marginBottom: 24, letterSpacing: '0.2em', textTransform: 'uppercase',
+        }}>
+          Web 3D · Video Hyperealistici · Menu Digitali
+        </p>
+      )}
 
       {/* Description */}
       <p className="text-glow-body" style={{
@@ -51,13 +62,13 @@ export default function LeftPanel({ mobile = false }) {
       </p>
 
       {/* CTAs */}
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'nowrap' }}>
         <button
           onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
           style={{
-            padding: '12px 26px', borderRadius: 4,
+            padding: '11px 18px', borderRadius: 4,
             background: '#C0C8D4', color: '#0a0a0f',
-            fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer',
+            fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer',
             textTransform: 'uppercase', letterSpacing: '0.5px',
             transition: 'all 0.2s', fontFamily: 'Space Grotesk, sans-serif',
           }}
@@ -69,9 +80,9 @@ export default function LeftPanel({ mobile = false }) {
         <button
           onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
           style={{
-            padding: '12px 26px', borderRadius: 4,
+            padding: '11px 18px', borderRadius: 4,
             background: 'transparent', color: '#C0C8D4',
-            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+            fontWeight: 600, fontSize: 12, cursor: 'pointer',
             border: '1px solid rgba(192,200,212,0.4)',
             textTransform: 'uppercase', letterSpacing: '0.5px',
             transition: 'all 0.2s', fontFamily: 'Space Grotesk, sans-serif',
