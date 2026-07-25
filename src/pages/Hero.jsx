@@ -35,10 +35,8 @@ function VideoLaptop() {
       ctx.clearRect(0, 0, cw, ch)
 
       if (isMobile()) {
-        // Sfondo navy che matcha il video — niente barre nere visibili
         ctx.fillStyle = '#08111f'
         ctx.fillRect(0, 0, cw, ch)
-        // Laptop in contain con margine laterale per non uscire dai bordi
         const scale = Math.min((cw * 0.92) / iw, ch / ih)
         const x = (cw - iw * scale) / 2
         const y = ch * 0.02
