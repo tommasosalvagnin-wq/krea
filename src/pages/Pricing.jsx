@@ -164,7 +164,7 @@ function PricingCard({ card, scrollToContact }) {
 
   return (
     <div
-      className={`pricing-card${featured ? ' is-pro' : ''}`}
+      className={`pricing-card pricing-card-body${featured ? ' is-pro' : ''}`}
       style={{
         position: 'relative',
         background: featured ? undefined : 'rgba(255,255,255,0.02)',
@@ -536,21 +536,23 @@ export default function Pricing() {
           transform: scale(1.02) !important;
           opacity: 0.9 !important;
         }
-        /* Mobile: disabilita effetto reciproco */
+        /* Mobile */
         @media (max-width: 768px) {
           .pricing-cards-wrapper {
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
           }
           .pricing-cards-wrapper:hover .pricing-card:not(:hover) {
             transform: scale(1) !important;
             opacity: 1 !important;
           }
-          .pricing-card:hover {
-            transform: scale(1) !important;
-          }
-          .pricing-card.is-pro {
-            transform: scale(1) !important;
+          .pricing-card:hover { transform: scale(1) !important; }
+          .pricing-card.is-pro { transform: scale(1) !important; }
+          .pricing-card-body { padding: 24px 20px !important; }
+          .tab-btn {
+            padding: 9px 18px !important;
+            min-width: 0 !important;
+            font-size: 13px !important;
           }
         }
       `}</style>
@@ -580,7 +582,7 @@ export default function Pricing() {
       {/* Altri Servizi */}
       <div style={{
         maxWidth: 1060, margin: '64px auto 0',
-        padding: '32px 40px', borderRadius: 8,
+        padding: 'clamp(20px, 5vw, 32px) clamp(16px, 5vw, 40px)', borderRadius: 8,
         background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(192,200,212,0.1)',
         display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 24,
       }}>
