@@ -12,6 +12,7 @@ const MOBILE_ANIM_VH = INITIAL_VH * 2 // animazione su 2 viewport di scroll
 
 function VideoLaptop() {
   const canvasRef = useRef(null)
+  const loaderRef = useRef(null)
   const frames = useRef(new Array(TOTAL_FRAMES).fill(null))
   const loaded = useRef(0)
 
@@ -55,7 +56,13 @@ function VideoLaptop() {
       img.onload = () => {
         frames.current[i] = img
         loaded.current++
-        if (i === 0) drawFrame(img)
+        if (i === 0) {
+          drawFrame(img)
+          if (loaderRef.current) {
+            loaderRef.current.style.opacity = '0'
+            setTimeout(() => { if (loaderRef.current) loaderRef.current.style.display = 'none' }, 400)
+          }
+        }
       }
     }
 
@@ -90,13 +97,22 @@ function VideoLaptop() {
     }}>
       <canvas
         ref={canvasRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'block',
-          pointerEvents: 'none',
-        }}
+        style={{ width: '100%', height: '100%', display: 'block', pointerEvents: 'none' }}
       />
+      {/* Loader — scompare quando il primo frame è pronto */}
+      <div ref={loaderRef} style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: '#08111f', transition: 'opacity 0.4s ease', zIndex: 2,
+      }}>
+        <div style={{
+          width: 36, height: 36, borderRadius: '50%',
+          border: '2px solid rgba(192,200,212,0.15)',
+          borderTopColor: '#C0C8D4',
+          animation: 'spin 0.8s linear infinite',
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
     </div>
   )
 }
