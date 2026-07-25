@@ -33,7 +33,6 @@ const projects = [
 
 export default function Portfolio() {
   const [open, setOpen] = useState(false)
-  const [active, setActive] = useState(0)
 
   return (
     <section id="portfolio" className="portfolio-section">
@@ -57,26 +56,22 @@ export default function Portfolio() {
             {/* Folder body — contains project list when open */}
             <div className="pf-back">
               <div className="pf-inner-info">
-                {projects.map((p, i) => (
-                  <div
+                {projects.map((p) => (
+                  <a
                     key={p.id}
-                    className={`pf-row${active === i ? ' is-active' : ''}`}
-                    onClick={e => { e.stopPropagation(); setActive(i) }}
+                    href={p.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pf-row"
+                    onClick={e => e.stopPropagation()}
                   >
                     <div className="pf-row-left">
                       <span className="pf-row-tag" style={{ color: p.color }}>{p.tag}</span>
                       <span className="pf-row-title">{p.title}</span>
                       <span className="pf-row-desc">{p.desc}</span>
                     </div>
-                    <a
-                      href={p.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="pf-row-link"
-                      style={{ color: p.color }}
-                      onClick={e => e.stopPropagation()}
-                    >→</a>
-                  </div>
+                    <span className="pf-row-link" style={{ color: p.color }}>→</span>
+                  </a>
                 ))}
               </div>
             </div>
@@ -93,8 +88,12 @@ export default function Portfolio() {
               <div className="pf-shine" />
             </div>
 
-            {/* Folder lid */}
+            {/* Folder lid — copertina con titolo */}
             <div className="pf-lid">
+              <div className="pf-lid-cover">
+                <span className="pf-lid-label">I nostri</span>
+                <span className="pf-lid-name">Progetti</span>
+              </div>
               <div className="pf-lid-line" />
             </div>
 

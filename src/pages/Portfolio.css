@@ -76,10 +76,10 @@
   bottom: 0;
   width: 100%;
   height: 80%;
-  background: #0d1827;
+  background: #111318;
   border-radius: 0 10px 10px 10px;
-  border: 1px solid rgba(192, 200, 212, 0.12);
-  filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.6));
+  border: 1px solid rgba(192, 200, 212, 0.14);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
   overflow: hidden;
 }
 
@@ -91,9 +91,9 @@
   left: 0;
   width: 34%;
   height: 16px;
-  background: #0d1827;
+  background: #111318;
   border-radius: 6px 6px 0 0;
-  border: 1px solid rgba(192, 200, 212, 0.12);
+  border: 1px solid rgba(192, 200, 212, 0.14);
   border-bottom: none;
 }
 
@@ -105,7 +105,7 @@
   flex-direction: column;
   justify-content: center;
   gap: 0;
-  padding: 10px 14px;
+  padding: 8px 12px;
   opacity: 0;
   transform: translateY(6px);
   transition: opacity 0.35s ease 0.45s, transform 0.35s ease 0.45s;
@@ -118,21 +118,24 @@
   pointer-events: auto;
 }
 
+/* Each project row is now a full link */
 .pf-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
-  border-radius: 7px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(192, 200, 212, 0.06);
+  transition: background 0.18s;
   cursor: pointer;
-  transition: background 0.2s;
-  border-bottom: 1px solid rgba(192, 200, 212, 0.05);
 }
 
 .pf-row:last-child { border-bottom: none; }
 
-.pf-row.is-active {
-  background: rgba(192, 200, 212, 0.06);
+.pf-row:active,
+.pf-row:hover {
+  background: rgba(192, 200, 212, 0.07);
 }
 
 .pf-row-left {
@@ -170,15 +173,14 @@
 }
 
 .pf-row-link {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  text-decoration: none;
   flex-shrink: 0;
-  opacity: 0.7;
+  opacity: 0.6;
   transition: opacity 0.2s;
 }
 
-.pf-row-link:hover { opacity: 1; }
+.pf-row:hover .pf-row-link { opacity: 1; }
 
 /* ── Files ── */
 .pf-file {
@@ -238,9 +240,10 @@
   bottom: -6px;
   width: 100%;
   height: 80%;
-  background: linear-gradient(155deg, #141f33 0%, #0d1827 100%);
+  background: linear-gradient(150deg, #1c1e26 0%, #13141a 60%, #0f1014 100%);
   border-radius: 0 10px 10px 10px;
-  border: 1px solid rgba(192, 200, 212, 0.16);
+  border: 1px solid rgba(192, 200, 212, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
   transform-origin: bottom center;
   transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2);
   z-index: 90;
@@ -254,31 +257,66 @@
   left: 0;
   width: 34%;
   height: 16px;
-  background: #141f33;
+  background: #1c1e26;
   border-radius: 6px 6px 0 0;
-  border: 1px solid rgba(192, 200, 212, 0.16);
+  border: 1px solid rgba(192, 200, 212, 0.18);
   border-bottom: none;
 }
 
+/* Decorative horizontal line at top */
 .pf-lid-line {
   position: absolute;
-  top: 14px;
-  left: 16px;
+  top: 13px;
+  left: 14px;
   width: 42px;
-  height: 3px;
-  background: rgba(192, 200, 212, 0.18);
+  height: 2px;
+  background: rgba(192, 200, 212, 0.15);
   border-radius: 10px;
 }
 
 .pf-lid-line::after {
   content: '';
   position: absolute;
-  top: 7px;
+  top: 6px;
   left: 0;
   width: 26px;
-  height: 3px;
-  background: rgba(192, 200, 212, 0.1);
+  height: 2px;
+  background: rgba(192, 200, 212, 0.08);
   border-radius: 10px;
+}
+
+/* ── Cover text on lid ── */
+.pf-lid-cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.pf-folder.is-open .pf-lid-cover {
+  opacity: 0;
+}
+
+.pf-lid-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(192, 200, 212, 0.4);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+.pf-lid-name {
+  font-family: 'Cormorant Garant', Georgia, serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: rgba(232, 236, 240, 0.85);
+  letter-spacing: 0.04em;
+  line-height: 1;
 }
 
 .pf-folder.is-open .pf-lid {
@@ -319,6 +357,7 @@
     height: 300px;
   }
 
+  .pf-lid-name { font-size: 32px; }
   .pf-row-title { font-size: 15px; }
   .pf-row-desc { font-size: 11px; }
 }
