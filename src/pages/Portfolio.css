@@ -321,6 +321,11 @@
 
 .pf-folder.is-open .pf-lid {
   transform: rotateX(-50deg);
+  pointer-events: none;
+}
+
+.pf-folder.is-open .pf-file {
+  pointer-events: none;
 }
 
 /* ── Hint ── */
