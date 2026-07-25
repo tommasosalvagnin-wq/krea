@@ -12,7 +12,7 @@ export default function LeftPanel({ mobile = false }) {
         padding: '6px 14px', borderRadius: 999,
         border: '1px solid rgba(192,200,212,0.2)',
         background: 'rgba(192,200,212,0.04)',
-        width: 'fit-content', marginBottom: mobile ? 14 : 28,
+        width: 'fit-content', marginBottom: mobile ? 20 : 28,
       }}>
         <span style={{
           width: 6, height: 6, borderRadius: '50%', background: '#C0C8D4',
