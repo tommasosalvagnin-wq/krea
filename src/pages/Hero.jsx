@@ -170,10 +170,10 @@ export default function Hero() {
   return (
     <div ref={wrapperRef} style={{ height: isMobile ? `${INITIAL_VH * 3}px` : '100vh' }}>
     <section id="hero" style={{
-      position: 'sticky', top: 0,
-      height: `${INITIAL_VH}px`, width: '100%',
+      position: 'fixed', top: 0, left: 0, right: 0,
+      height: `${INITIAL_VH}px`,
       background: '#08111f',
-      overflow: 'hidden', zIndex: 10,
+      overflow: 'hidden', zIndex: 5,
     }}>
       {/* Video a tutto schermo — z-index 0 */}
       <VideoLaptop />

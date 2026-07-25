@@ -13,17 +13,18 @@ export default function App() {
   return (
     <div style={{ background: '#0a0a0f', minHeight: '100vh' }}>
 
-      {/* Hero sticky + 100vh buffer per animazione scroll video */}
-      <div style={{ position: 'relative' }}>
-        <Hero />
-        <div style={{ height: '100vh', background: '#0a0a0f', pointerEvents: 'none' }} aria-hidden="true" />
-      </div>
+      {/* Hero con position:fixed — non sale mai verso l'alto */}
+      <Hero />
 
-      <Pricing />
-      <Presenter />
-      <Portfolio />
-      <Contact />
-      <Footer  />
+      {/* Le sezioni successive scivolano SOPRA la hero (z-index 10 > 5)
+          con sfondo solido — il laptop viene coperto dal basso, mai tagliato */}
+      <div style={{ position: 'relative', zIndex: 10, background: '#0a0a0f' }}>
+        <Pricing />
+        <Presenter />
+        <Portfolio />
+        <Contact />
+        <Footer />
+      </div>
     </div>
   )
 }
