@@ -12,7 +12,12 @@ export default function Footer() {
       padding: 'clamp(40px, 8vw, 80px) clamp(16px, 5vw, 40px) clamp(24px, 4vw, 40px)',
     }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 48, marginBottom: 64 }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
+          gap: 'clamp(28px, 5vw, 48px)',
+          marginBottom: 'clamp(36px, 6vw, 64px)',
+        }}>
 
           {/* Brand */}
           <div>
@@ -71,7 +76,7 @@ export default function Footer() {
         {/* Bottom */}
         <div style={{
           paddingTop: 32, borderTop: '1px solid rgba(192,200,212,0.06)',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, textAlign: 'center',
         }}>
           <p style={{ margin: 0, fontSize: 12, color: '#445566' }}>© 2025 KREA Agency. Tutti i diritti riservati.</p>
           <div style={{ display: 'flex', gap: 20 }}>
