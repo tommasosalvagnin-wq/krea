@@ -60,6 +60,11 @@
   padding: 0;
 }
 
+@media (max-width: 768px) {
+  .kf-input-container textarea.kf-input { height: 70px; }
+  .kf-input { font-size: 16px; } /* evita zoom automatico iOS */
+}
+
 select.kf-input {
   appearance: none;
   cursor: pointer;

@@ -13,7 +13,7 @@ export default function Contact() {
       }}
     >
       <div className="contact-inner" style={{ maxWidth: 620, margin: '0 auto', opacity: 0 }}>
-        <div style={{ textAlign: 'center', marginBottom: 52 }}>
+        <div style={{ textAlign: 'center', marginBottom: 'clamp(28px, 5vw, 52px)' }}>
           <p style={{ color: '#C0C8D4', fontSize: 11, fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
             Inizia ora
           </p>
