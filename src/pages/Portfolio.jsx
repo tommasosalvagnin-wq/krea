@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './Portfolio.css'
 
 const projects = [
@@ -30,6 +31,70 @@ const projects = [
   },
 ]
 
+function FolderCard({ project }) {
+  const [open, setOpen] = useState(false)
+  const c = project.color
+
+  return (
+    <div className="pf-card">
+      <div
+        className={`pf-folder${open ? ' is-open' : ''}`}
+        onClick={() => setOpen(o => !o)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={e => e.key === 'Enter' && setOpen(o => !o)}
+        aria-label={`${open ? 'Chiudi' : 'Apri'} progetto ${project.title}`}
+      >
+        <div className="pf-container">
+          {/* Folder body */}
+          <div className="pf-back" />
+
+          {/* Files that fan out on open */}
+          <div className="pf-file pf-f3" style={{ background: c + '18' }} />
+          <div className="pf-file pf-f2" style={{ background: c + '30' }} />
+          <div className="pf-file pf-f1">
+            {project.img && <img src={project.img} alt={project.title} />}
+            <div className="pf-shine" />
+          </div>
+
+          {/* Folder lid */}
+          <div className="pf-lid">
+            <div className="pf-lid-line" />
+          </div>
+
+          {/* Badge — visible when open */}
+          <div className="pf-badge" style={{ background: c + 'dd' }}>
+            <span className="pf-dot" />
+            <span className="pf-badge-label">{project.tag}</span>
+          </div>
+
+          {/* Hint — visible when closed */}
+          <div className="pf-hint">
+            <span>tocca</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Info below */}
+      <div className="pf-info">
+        <span className="pf-tag" style={{ color: c }}>{project.tag}</span>
+        <h3 className="pf-title">{project.title}</h3>
+        <p className="pf-desc">{project.desc}</p>
+        <a
+          href={project.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pf-link"
+          style={{ color: c }}
+          onClick={e => e.stopPropagation()}
+        >
+          Vedi progetto →
+        </a>
+      </div>
+    </div>
+  )
+}
+
 export default function Portfolio() {
   return (
     <section id="portfolio" className="portfolio-section">
@@ -39,33 +104,9 @@ export default function Portfolio() {
         <p className="portfolio-sub">Dalla strategia al lancio — ogni progetto costruito per convertire.</p>
       </div>
 
-      <div className="portfolio-dock-wrap">
-        <div className="portfolio-dock">
-          {projects.map((p, i) => (
-            <a
-              className="dock-card"
-              key={p.id}
-              href={p.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ '--accent': p.color, textDecoration: 'none' }}
-            >
-              <div className="dock-card-img">
-                {p.img
-                  ? <img src={p.img} alt={p.title} />
-                  : <div className="dock-card-placeholder" style={{ background: `radial-gradient(ellipse at 30% 40%, ${p.color}22 0%, transparent 70%)` }}>
-                      <span className="dock-card-num">0{i + 1}</span>
-                    </div>
-                }
-              </div>
-              <div className="dock-card-body">
-                <span className="dock-card-tag">{p.tag}</span>
-                <h3 className="dock-card-title">{p.title}</h3>
-                <p className="dock-card-desc">{p.desc}</p>
-                <span className="dock-card-btn">Vedi progetto →</span>
-              </div>
-            </a>
-          ))}
+      <div className="pf-scroll-wrap">
+        <div className="pf-track">
+          {projects.map(p => <FolderCard key={p.id} project={p} />)}
         </div>
       </div>
     </section>

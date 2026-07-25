@@ -1,10 +1,9 @@
+/* ── Section ── */
 .portfolio-section {
   position: relative;
-  zIndex: 20;
   background: #0a0a0f;
   padding: clamp(80px, 12vw, 140px) 0 clamp(80px, 12vw, 140px);
   border-top: 1px solid rgba(192, 200, 212, 0.06);
-  overflow: hidden;
 }
 
 .portfolio-header {
@@ -20,6 +19,7 @@
   letter-spacing: 0.3em;
   text-transform: uppercase;
   margin-bottom: 16px;
+  margin-top: 0;
 }
 
 .portfolio-title {
@@ -39,184 +39,329 @@
   margin: 0 auto;
 }
 
-/* Dock container */
-.portfolio-dock-wrap {
-  display: flex;
-  justify-content: center;
-  padding: 40px clamp(16px, 5vw, 40px) 20px;
+/* ── Scroll container ── */
+.pf-scroll-wrap {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 70px clamp(20px, 5vw, 40px) 40px;
 }
 
-.portfolio-dock {
+.pf-scroll-wrap::-webkit-scrollbar { display: none; }
+
+.pf-track {
   display: flex;
-  transform-style: preserve-3d;
-  transform: perspective(1200px);
-  gap: 20px;
-  align-items: flex-end;
+  gap: 28px;
+  align-items: flex-start;
+  min-width: max-content;
 }
 
-/* Card */
-.dock-card {
-  position: relative;
+/* ── Card shell ── */
+.pf-card {
   flex-shrink: 0;
-  width: clamp(240px, 28vw, 320px);
-  border-radius: 16px;
-  border: 1px solid rgba(192, 200, 212, 0.08);
-  background: rgba(255, 255, 255, 0.02);
-  overflow: hidden;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ── Folder wrapper ── */
+.pf-folder {
+  width: 240px;
+  height: 180px;
+  perspective: 1200px;
   cursor: pointer;
-  transition: transform 500ms cubic-bezier(0.175, 0.885, 0.32, 1.1),
-              box-shadow 500ms ease,
-              border-color 300ms ease;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
-.dock-card:active {
-  transform: scale(0.97);
-  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.dock-card:hover {
-  transform: scale(1.06) translateY(-8px);
-  z-index: 99999;
-  border-color: rgba(192, 200, 212, 0.25);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 40px color-mix(in srgb, var(--accent) 15%, transparent);
-}
-
-/* Adjacent card effects (dock ripple) */
-.dock-card:hover + .dock-card {
-  transform: scale(1.03) translateY(-4px);
-  z-index: 9999;
-}
-
-.dock-card:hover + .dock-card + .dock-card {
-  transform: scale(1.015) translateY(-2px);
-  z-index: 999;
-}
-
-.dock-card:has(+ .dock-card:hover) {
-  transform: scale(1.03) translateY(-4px);
-  z-index: 9999;
-}
-
-.dock-card:has(+ .dock-card + .dock-card:hover) {
-  transform: scale(1.015) translateY(-2px);
-  z-index: 999;
-}
-
-/* Image area */
-.dock-card-img {
+.pf-container {
+  position: relative;
   width: 100%;
-  height: 200px;
-  overflow: hidden;
-  background: #0d0d14;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
 }
 
-.dock-card-img img {
+.pf-folder.is-open .pf-container {
+  transform: rotateX(10deg) rotateY(-5deg);
+}
+
+/* ── Folder back (body) ── */
+.pf-back {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 82%;
+  background: #0d1827;
+  border-radius: 0 8px 8px 8px;
+  border: 1px solid rgba(192, 200, 212, 0.12);
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.55));
+}
+
+/* Tab ear */
+.pf-back::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 0;
+  width: 36%;
+  height: 16px;
+  background: #0d1827;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid rgba(192, 200, 212, 0.12);
+  border-bottom: none;
+}
+
+/* ── Files ── */
+.pf-file {
+  position: absolute;
+  bottom: 8px;
+  left: 10%;
+  width: 80%;
+  height: 68%;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pf-f1 { z-index: 25; transition-delay: 0.15s; }
+.pf-f2 { z-index: 24; transition-delay: 0.1s; }
+.pf-f3 { z-index: 23; transition-delay: 0.05s; }
+
+.pf-f1 img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 600ms ease;
 }
 
-.dock-card:hover .dock-card-img img {
-  transform: scale(1.05);
-}
-
-.dock-card-placeholder {
-  width: 100%;
+.pf-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
   height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+
+.pf-folder.is-open .pf-shine {
+  left: 150%;
+  transition: left 0.8s ease-in-out 0.3s;
+}
+
+/* Open: fan out */
+.pf-folder.is-open .pf-f1 {
+  transform: translateY(-72px) rotate(-10deg) translateX(-16px) translateZ(20px);
+}
+.pf-folder.is-open .pf-f2 {
+  transform: translateY(-56px) rotate(8deg) translateX(18px) translateZ(10px);
+}
+.pf-folder.is-open .pf-f3 {
+  transform: translateY(-40px) rotate(-14deg) translateX(-8px);
+}
+
+/* ── Folder lid ── */
+.pf-lid {
+  position: absolute;
+  bottom: -7px;
+  width: 100%;
+  height: 82%;
+  background: linear-gradient(160deg, #121f33 0%, #0d1827 100%);
+  border-radius: 0 8px 8px 8px;
+  border: 1px solid rgba(192, 200, 212, 0.16);
+  transform-origin: bottom center;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 90;
+  overflow: hidden;
+}
+
+.pf-lid::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 0;
+  width: 36%;
+  height: 16px;
+  background: #121f33;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid rgba(192, 200, 212, 0.16);
+  border-bottom: none;
+}
+
+.pf-lid-line {
+  position: absolute;
+  top: 13px;
+  left: 14px;
+  width: 38px;
+  height: 3px;
+  background: rgba(192, 200, 212, 0.2);
+  border-radius: 10px;
+}
+
+.pf-lid-line::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  left: 0;
+  width: 24px;
+  height: 3px;
+  background: rgba(192, 200, 212, 0.12);
+  border-radius: 10px;
+}
+
+.pf-folder.is-open .pf-lid {
+  transform: rotateX(-52deg);
+}
+
+/* ── Badge ── */
+.pf-badge {
+  position: absolute;
+  top: -38px;
+  right: -10px;
+  padding: 5px 10px;
+  border-radius: 50px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: #0d0d14;
+  gap: 6px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.15);
+  transform: scale(0) translateY(20px);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 100;
+  pointer-events: none;
 }
 
-.dock-card-num {
-  font-family: 'Syne', sans-serif;
-  font-size: 56px;
-  font-weight: 900;
-  color: rgba(192, 200, 212, 0.06);
-  letter-spacing: -2px;
-  user-select: none;
+.pf-folder.is-open .pf-badge {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  transition-delay: 0.22s;
 }
 
-/* Body */
-.dock-card-body {
-  padding: 20px 22px 22px;
+.pf-dot {
+  width: 6px;
+  height: 6px;
+  background: #34d399;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #34d399;
+  position: relative;
+  flex-shrink: 0;
 }
 
-.dock-card-tag {
+.pf-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #34d399;
+  border-radius: 50%;
+  animation: pf-pulse 2s infinite;
+}
+
+@keyframes pf-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+.pf-badge-label {
+  font-size: 9px;
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* ── Hint (tap cue) ── */
+.pf-hint {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  z-index: 95;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  animation: pf-float 2.5s ease-in-out infinite;
+}
+
+.pf-hint span {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(192, 200, 212, 0.4);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.pf-folder.is-open .pf-hint {
+  opacity: 0;
+}
+
+@keyframes pf-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* ── Info below ── */
+.pf-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pf-tag {
   font-size: 10px;
-  font-weight: 600;
-  color: var(--accent);
+  font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   display: block;
-  margin-bottom: 8px;
 }
 
-.dock-card-title {
+.pf-title {
   font-family: 'Syne', sans-serif;
   font-size: 18px;
   font-weight: 800;
   color: #E8ECF0;
-  margin: 0 0 8px;
+  margin: 0;
   letter-spacing: -0.5px;
 }
 
-.dock-card-desc {
+.pf-desc {
   font-size: 13px;
   color: rgba(224, 231, 255, 0.45);
   line-height: 1.6;
-  margin: 0 0 18px;
+  margin: 0;
 }
 
-.dock-card-btn {
-  background: none;
-  border: none;
-  color: var(--accent);
+.pf-link {
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  padding: 0;
-  font-family: inherit;
+  text-decoration: none;
   transition: opacity 0.2s;
+  margin-top: 4px;
+  display: inline-block;
 }
 
-.dock-card-btn:hover {
-  opacity: 0.7;
-}
+.pf-link:hover { opacity: 0.7; }
 
-/* Mobile: scroll orizzontale */
-@media (max-width: 768px) {
-  .portfolio-dock-wrap {
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 32px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+/* ── Desktop ── */
+@media (min-width: 900px) {
+  .pf-scroll-wrap {
+    overflow: visible;
+    display: flex;
+    justify-content: center;
   }
 
-  .portfolio-dock-wrap::-webkit-scrollbar {
-    display: none;
+  .pf-track {
+    min-width: unset;
+    justify-content: center;
+    gap: 40px;
   }
 
-  .portfolio-dock {
-    padding: 20px 20px 8px;
-    gap: 14px;
-  }
-
-  .dock-card {
-    width: 260px;
-    flex-shrink: 0;
-  }
-
-  .dock-card:hover,
-  .dock-card:hover + .dock-card,
-  .dock-card:hover + .dock-card + .dock-card,
-  .dock-card:has(+ .dock-card:hover),
-  .dock-card:has(+ .dock-card + .dock-card:hover) {
-    transform: none;
-  }
+  .pf-card { width: 280px; }
+  .pf-folder { width: 280px; height: 200px; }
 }
