@@ -6,7 +6,6 @@ const projects = [
     id: 'motoutlet',
     title: 'MotOutlet',
     tag: 'Automotive',
-    desc: 'Sito per concessionaria moto multimarca. Catalogo, filtri e schede tecniche.',
     color: '#C0A882',
     img: `${import.meta.env.BASE_URL}images/motoutlet.jpg`,
     link: 'https://motoutlet-pordenone-demo.netlify.app/',
@@ -15,7 +14,6 @@ const projects = [
     id: 'monolocale',
     title: 'Monolocale Padova',
     tag: 'Immobiliare',
-    desc: 'Sito per affitti brevi con booking integrato. 4.95 stelle, 83 recensioni.',
     color: '#8A9BB0',
     img: `${import.meta.env.BASE_URL}images/monolocale.jpg`,
     link: 'https://monolocale-padova-2026.netlify.app/',
@@ -24,7 +22,6 @@ const projects = [
     id: 'bisson',
     title: 'Bisson Auto',
     tag: 'Automotive',
-    desc: 'Sito vetrina per concessionaria Mazda con video hero e form contatti.',
     color: '#9BB08A',
     img: `${import.meta.env.BASE_URL}images/bisson.jpg`,
     link: 'https://bisson-auto.netlify.app/',
@@ -33,6 +30,14 @@ const projects = [
 
 export default function Portfolio() {
   const [open, setOpen] = useState(false)
+
+  const handleFileClick = (e, link) => {
+    if (open) {
+      e.stopPropagation()
+      window.open(link, '_blank', 'noopener,noreferrer')
+    }
+    // se chiuso, il click si propaga al parent che apre la cartella
+  }
 
   return (
     <section id="portfolio" className="portfolio-section">
@@ -53,40 +58,34 @@ export default function Portfolio() {
         >
           <div className="pf-container">
 
-            {/* Folder body — contains project list when open */}
+            {/* Folder body */}
             <div className="pf-back">
-              <div className="pf-inner-info">
-                {projects.map((p) => (
-                  <a
-                    key={p.id}
-                    href={p.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="pf-row"
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <div className="pf-row-left">
-                      <span className="pf-row-tag" style={{ color: p.color }}>{p.tag}</span>
-                      <span className="pf-row-title">{p.title}</span>
-                      <span className="pf-row-desc">{p.desc}</span>
-                    </div>
-                    <span className="pf-row-link" style={{ color: p.color }}>→</span>
-                  </a>
-                ))}
-              </div>
+              {open && (
+                <div className="pf-close-hint">
+                  <span>tocca qui per chiudere</span>
+                </div>
+              )}
             </div>
 
-            {/* 3 project files that fan out */}
-            <div className="pf-file pf-f3">
-              <img src={projects[2].img} alt={projects[2].title} />
-            </div>
-            <div className="pf-file pf-f2">
-              <img src={projects[1].img} alt={projects[1].title} />
-            </div>
-            <div className="pf-file pf-f1">
-              <img src={projects[0].img} alt={projects[0].title} />
-              <div className="pf-shine" />
-            </div>
+            {/* 3 file cliccabili — apre il link quando aperta */}
+            {projects.map((p, i) => (
+              <div
+                key={p.id}
+                className={`pf-file pf-f${3 - i}`}
+                onClick={e => handleFileClick(e, p.link)}
+                role={open ? 'link' : undefined}
+                aria-label={open ? `Apri ${p.title}` : undefined}
+              >
+                <img src={p.img} alt={p.title} />
+                {open && (
+                  <div className="pf-file-label">
+                    <span className="pf-file-tag" style={{ color: p.color }}>{p.tag}</span>
+                    <span className="pf-file-name">{p.title}</span>
+                    <span className="pf-file-arrow" style={{ color: p.color }}>apri →</span>
+                  </div>
+                )}
+              </div>
+            ))}
 
             {/* Folder lid — copertina con titolo */}
             <div className="pf-lid">
@@ -97,7 +96,7 @@ export default function Portfolio() {
               <div className="pf-lid-line" />
             </div>
 
-            {/* Hint */}
+            {/* Hint chiuso */}
             <div className="pf-hint"><span>tocca</span></div>
           </div>
         </div>

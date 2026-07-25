@@ -81,9 +81,12 @@
   border: 1px solid rgba(192, 200, 212, 0.14);
   box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
   overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 12px;
 }
 
-/* Tab ear */
 .pf-back::before {
   content: '';
   position: absolute;
@@ -97,90 +100,15 @@
   border-bottom: none;
 }
 
-/* ── Inner project list (inside folder body) ── */
-.pf-inner-info {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0;
-  padding: 8px 12px;
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 0.35s ease 0.45s, transform 0.35s ease 0.45s;
-  pointer-events: none;
-}
-
-.pf-folder.is-open .pf-inner-info {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-/* Each project row is now a full link */
-.pf-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 8px;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(192, 200, 212, 0.06);
-  transition: background 0.18s;
-  cursor: pointer;
-}
-
-.pf-row:last-child { border-bottom: none; }
-
-.pf-row:active,
-.pf-row:hover {
-  background: rgba(192, 200, 212, 0.07);
-}
-
-.pf-row-left {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-
-.pf-row-tag {
+/* Close hint inside folder body */
+.pf-close-hint {
   font-size: 9px;
-  font-weight: 700;
+  font-weight: 600;
+  color: rgba(192, 200, 212, 0.25);
   letter-spacing: 0.18em;
   text-transform: uppercase;
+  animation: pf-float 2.5s ease-in-out infinite;
 }
-
-.pf-row-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 14px;
-  font-weight: 800;
-  color: #E8ECF0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.pf-row-desc {
-  font-size: 10px;
-  color: rgba(224, 231, 255, 0.35);
-  line-height: 1.5;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.pf-row-link {
-  font-size: 18px;
-  font-weight: 700;
-  flex-shrink: 0;
-  opacity: 0.6;
-  transition: opacity 0.2s;
-}
-
-.pf-row:hover .pf-row-link { opacity: 1; }
 
 /* ── Files ── */
 .pf-file {
@@ -193,6 +121,7 @@
   overflow: hidden;
   transition: all 0.55s cubic-bezier(0.68, -0.45, 0.265, 1.4);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
 }
 
 .pf-file img {
@@ -200,6 +129,11 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.3s ease;
+}
+
+.pf-folder.is-open .pf-file:active img {
+  transform: scale(0.97);
 }
 
 .pf-f1 { z-index: 25; transition-delay: 0.12s; }
@@ -215,6 +149,47 @@
 }
 .pf-folder.is-open .pf-f3 {
   transform: translateX(54%) translateY(-72%) rotate(18deg);
+}
+
+/* Label overlay on each file when open */
+.pf-file-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 18px 8px 8px;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  animation: pf-label-in 0.3s ease forwards;
+}
+
+@keyframes pf-label-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.pf-file-tag {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.pf-file-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  color: #E8ECF0;
+  line-height: 1.2;
+}
+
+.pf-file-arrow {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
 }
 
 /* Shine on f1 */
@@ -248,6 +223,7 @@
   transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2);
   z-index: 90;
   overflow: hidden;
+  pointer-events: none;
 }
 
 .pf-lid::before {
@@ -263,7 +239,6 @@
   border-bottom: none;
 }
 
-/* Decorative horizontal line at top */
 .pf-lid-line {
   position: absolute;
   top: 13px;
@@ -321,14 +296,9 @@
 
 .pf-folder.is-open .pf-lid {
   transform: rotateX(-50deg);
-  pointer-events: none;
 }
 
-.pf-folder.is-open .pf-file {
-  pointer-events: none;
-}
-
-/* ── Hint ── */
+/* ── Hint (closed state) ── */
 .pf-hint {
   position: absolute;
   bottom: 12px;
@@ -363,6 +333,5 @@
   }
 
   .pf-lid-name { font-size: 32px; }
-  .pf-row-title { font-size: 15px; }
-  .pf-row-desc { font-size: 11px; }
+  .pf-file-name { font-size: 13px; }
 }
