@@ -31,71 +31,10 @@ const projects = [
   },
 ]
 
-function FolderCard({ project }) {
-  const [open, setOpen] = useState(false)
-  const c = project.color
-
-  return (
-    <div className="pf-card">
-      <div
-        className={`pf-folder${open ? ' is-open' : ''}`}
-        onClick={() => setOpen(o => !o)}
-        role="button"
-        tabIndex={0}
-        onKeyDown={e => e.key === 'Enter' && setOpen(o => !o)}
-        aria-label={`${open ? 'Chiudi' : 'Apri'} progetto ${project.title}`}
-      >
-        <div className="pf-container">
-          {/* Folder body */}
-          <div className="pf-back" />
-
-          {/* Files that fan out on open */}
-          <div className="pf-file pf-f3" style={{ background: c + '18' }} />
-          <div className="pf-file pf-f2" style={{ background: c + '30' }} />
-          <div className="pf-file pf-f1">
-            {project.img && <img src={project.img} alt={project.title} />}
-            <div className="pf-shine" />
-          </div>
-
-          {/* Folder lid */}
-          <div className="pf-lid">
-            <div className="pf-lid-line" />
-          </div>
-
-          {/* Badge — visible when open */}
-          <div className="pf-badge" style={{ background: c + 'dd' }}>
-            <span className="pf-dot" />
-            <span className="pf-badge-label">{project.tag}</span>
-          </div>
-
-          {/* Hint — visible when closed */}
-          <div className="pf-hint">
-            <span>tocca</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Info below */}
-      <div className="pf-info">
-        <span className="pf-tag" style={{ color: c }}>{project.tag}</span>
-        <h3 className="pf-title">{project.title}</h3>
-        <p className="pf-desc">{project.desc}</p>
-        <a
-          href={project.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="pf-link"
-          style={{ color: c }}
-          onClick={e => e.stopPropagation()}
-        >
-          Vedi progetto →
-        </a>
-      </div>
-    </div>
-  )
-}
-
 export default function Portfolio() {
+  const [open, setOpen] = useState(false)
+  const [active, setActive] = useState(0)
+
   return (
     <section id="portfolio" className="portfolio-section">
       <div className="portfolio-header">
@@ -104,9 +43,64 @@ export default function Portfolio() {
         <p className="portfolio-sub">Dalla strategia al lancio — ogni progetto costruito per convertire.</p>
       </div>
 
-      <div className="pf-scroll-wrap">
-        <div className="pf-track">
-          {projects.map(p => <FolderCard key={p.id} project={p} />)}
+      <div className="pf-center">
+        <div
+          className={`pf-folder${open ? ' is-open' : ''}`}
+          onClick={() => setOpen(o => !o)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => e.key === 'Enter' && setOpen(o => !o)}
+          aria-label={open ? 'Chiudi cartella progetti' : 'Apri cartella progetti'}
+        >
+          <div className="pf-container">
+
+            {/* Folder body — contains project list when open */}
+            <div className="pf-back">
+              <div className="pf-inner-info">
+                {projects.map((p, i) => (
+                  <div
+                    key={p.id}
+                    className={`pf-row${active === i ? ' is-active' : ''}`}
+                    onClick={e => { e.stopPropagation(); setActive(i) }}
+                  >
+                    <div className="pf-row-left">
+                      <span className="pf-row-tag" style={{ color: p.color }}>{p.tag}</span>
+                      <span className="pf-row-title">{p.title}</span>
+                      <span className="pf-row-desc">{p.desc}</span>
+                    </div>
+                    <a
+                      href={p.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pf-row-link"
+                      style={{ color: p.color }}
+                      onClick={e => e.stopPropagation()}
+                    >→</a>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 3 project files that fan out */}
+            <div className="pf-file pf-f3">
+              <img src={projects[2].img} alt={projects[2].title} />
+            </div>
+            <div className="pf-file pf-f2">
+              <img src={projects[1].img} alt={projects[1].title} />
+            </div>
+            <div className="pf-file pf-f1">
+              <img src={projects[0].img} alt={projects[0].title} />
+              <div className="pf-shine" />
+            </div>
+
+            {/* Folder lid */}
+            <div className="pf-lid">
+              <div className="pf-lid-line" />
+            </div>
+
+            {/* Hint */}
+            <div className="pf-hint"><span>tocca</span></div>
+          </div>
         </div>
       </div>
     </section>
