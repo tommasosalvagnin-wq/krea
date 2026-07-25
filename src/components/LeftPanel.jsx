@@ -62,14 +62,15 @@ export default function LeftPanel({ mobile = false }) {
       </p>
 
       {/* CTAs */}
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'nowrap' }}>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'nowrap', flexDirection: mobile ? 'column' : 'row' }}>
         <button
           onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
           style={{
-            padding: '11px 18px', borderRadius: 4,
+            padding: '13px 18px', borderRadius: 4,
             background: '#C0C8D4', color: '#0a0a0f',
             fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer',
             textTransform: 'uppercase', letterSpacing: '0.5px',
+            width: mobile ? '100%' : undefined,
             transition: 'all 0.2s', fontFamily: 'Space Grotesk, sans-serif',
           }}
           onMouseEnter={e => { e.currentTarget.style.background = '#D8DFE8'; e.currentTarget.style.transform = 'translateY(-1px)' }}
@@ -80,11 +81,12 @@ export default function LeftPanel({ mobile = false }) {
         <button
           onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
           style={{
-            padding: '11px 18px', borderRadius: 4,
+            padding: '13px 18px', borderRadius: 4,
             background: 'transparent', color: '#C0C8D4',
             fontWeight: 600, fontSize: 12, cursor: 'pointer',
             border: '1px solid rgba(192,200,212,0.4)',
             textTransform: 'uppercase', letterSpacing: '0.5px',
+            width: mobile ? '100%' : undefined,
             transition: 'all 0.2s', fontFamily: 'Space Grotesk, sans-serif',
           }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = '#C0C8D4'; e.currentTarget.style.background = 'rgba(192,200,212,0.06)' }}
