@@ -1,0 +1,43 @@
+.mf-strip {
+  background: #0a0a0f;
+  padding: clamp(80px, 12vw, 140px) clamp(20px, 5vw, 80px);
+  border-top: 1px solid rgba(192, 200, 212, 0.06);
+}
+
+.mf-inner {
+  max-width: 900px;
+}
+
+.mf-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(192, 200, 212, 0.4);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+
+.mf-text {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(56px, 11vw, 130px);
+  font-weight: 900;
+  letter-spacing: -3px;
+  line-height: 0.9;
+  color: #E8ECF0;
+  margin: 0 0 clamp(28px, 4vw, 48px);
+}
+
+.mf-text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(192, 200, 212, 0.35);
+}
+
+.mf-sub {
+  font-size: clamp(15px, 1.8vw, 18px);
+  color: rgba(192, 200, 212, 0.5);
+  line-height: 1.75;
+  max-width: 480px;
+  margin: 0;
+  font-weight: 400;
+}
