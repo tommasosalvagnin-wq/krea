@@ -1,0 +1,52 @@
+.mq-wrap {
+  width: 100%;
+  overflow: hidden;
+  padding: 18px 0;
+  border-top: 1px solid rgba(192, 200, 212, 0.07);
+  border-bottom: 1px solid rgba(192, 200, 212, 0.07);
+  background: #0a0a0f;
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+.mq-track {
+  display: flex;
+  width: max-content;
+  animation: mq-scroll 28s linear infinite;
+}
+
+.mq-reverse {
+  animation-direction: reverse;
+}
+
+@keyframes mq-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.mq-wrap:hover .mq-track {
+  animation-play-state: paused;
+}
+
+.mq-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(192, 200, 212, 0.45);
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+
+.mq-item:hover {
+  color: #C0C8D4;
+}
+
+.mq-dot {
+  font-size: 14px;
+  color: rgba(192, 200, 212, 0.2);
+}
