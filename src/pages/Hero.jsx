@@ -3,85 +3,32 @@ import LeftPanel  from '../components/LeftPanel'
 import RightPanel from '../components/RightPanel'
 import { useWindowSize } from '../hooks/useWindowSize'
 
-/* Video a tutto schermo — il laptop rimane centrato identico,
-   ma lo sfondo nero del video si espande a coprire l'intera hero */
-const TOTAL_FRAMES = 193
-// Misurato una volta sola al load — non cambia se la barra del browser si nasconde
 const INITIAL_VH = window.innerHeight
-const MOBILE_ANIM_VH = INITIAL_VH * 2 // animazione su 2 viewport di scroll
+// Scroll range over which the video plays — 3× the viewport height gives a slow, deliberate scrub
+const SCROLL_RANGE = INITIAL_VH * 3
 
 function VideoLaptop() {
-  const canvasRef = useRef(null)
-  const loaderRef = useRef(null)
-  const frames = useRef(new Array(TOTAL_FRAMES).fill(null))
-  const loaded = useRef(0)
+  const videoRef = useRef(null)
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    let rafId
+    const video = videoRef.current
+    if (!video) return
 
-    const isMobile = () => window.innerWidth < 768
-
-    const resize = () => {
-      canvas.width = canvas.offsetWidth
-      canvas.height = canvas.offsetHeight
-    }
-    resize()
-    window.addEventListener('resize', resize)
-
-    const drawFrame = (img) => {
-      const cw = canvas.width, ch = canvas.height
-      const iw = img.naturalWidth, ih = img.naturalHeight
-      ctx.clearRect(0, 0, cw, ch)
-
-      if (isMobile()) {
-        ctx.fillStyle = '#08111f'
-        ctx.fillRect(0, 0, cw, ch)
-        const scale = Math.min((cw * 0.92) / iw, ch / ih)
-        const x = (cw - iw * scale) / 2
-        const y = ch * 0.02
-        ctx.drawImage(img, x, y, iw * scale, ih * scale)
-      } else {
-        const scale = Math.max(cw / iw, ch / ih)
-        const x = (cw - iw * scale) / 2
-        const y = (ch - ih * scale) / 2
-        ctx.drawImage(img, x, y, iw * scale, ih * scale)
-      }
+    const scrub = () => {
+      if (!video.duration) return
+      const progress = Math.min(window.scrollY / SCROLL_RANGE, 1)
+      video.currentTime = progress * video.duration
     }
 
-    for (let i = 0; i < TOTAL_FRAMES; i++) {
-      const img = new Image()
-      img.src = `${import.meta.env.BASE_URL}frames/frame_${String(i + 1).padStart(3, '0')}.jpg`
-      img.onload = () => {
-        frames.current[i] = img
-        loaded.current++
-        if (i === 0) {
-          drawFrame(img)
-          if (loaderRef.current) {
-            loaderRef.current.style.opacity = '0'
-            setTimeout(() => { if (loaderRef.current) loaderRef.current.style.display = 'none' }, 400)
-          }
-        }
-      }
-    }
+    const onReady = () => { video.pause(); scrub() }
 
-    let lastIdx = -1
-    const loop = () => {
-      const scrollRange = isMobile() ? MOBILE_ANIM_VH : INITIAL_VH
-      const progress = Math.min(window.scrollY / scrollRange, 1)
-      const idx = Math.min(Math.round(progress * (TOTAL_FRAMES - 1)), TOTAL_FRAMES - 1)
-      if (frames.current[idx] && (idx !== lastIdx || canvas.width !== canvas.offsetWidth)) {
-        drawFrame(frames.current[idx])
-        lastIdx = idx
-      }
-      rafId = requestAnimationFrame(loop)
-    }
-    rafId = requestAnimationFrame(loop)
+    video.addEventListener('loadedmetadata', onReady)
+    window.addEventListener('scroll', scrub, { passive: true })
+    if (video.readyState >= 1) onReady()
 
     return () => {
-      cancelAnimationFrame(rafId)
-      window.removeEventListener('resize', resize)
+      video.removeEventListener('loadedmetadata', onReady)
+      window.removeEventListener('scroll', scrub)
     }
   }, [])
 
@@ -95,24 +42,14 @@ function VideoLaptop() {
       background: '#08111f',
       overflow: 'hidden',
     }}>
-      <canvas
-        ref={canvasRef}
-        style={{ width: '100%', height: '100%', display: 'block', pointerEvents: 'none' }}
+      <video
+        ref={videoRef}
+        src={`${import.meta.env.BASE_URL}videos/full_video.mp4`}
+        muted
+        playsInline
+        preload="auto"
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', pointerEvents: 'none' }}
       />
-      {/* Loader — scompare quando il primo frame è pronto */}
-      <div ref={loaderRef} style={{
-        position: 'absolute', inset: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: '#08111f', transition: 'opacity 0.4s ease', zIndex: 2,
-      }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: '50%',
-          border: '2px solid rgba(192,200,212,0.15)',
-          borderTopColor: '#C0C8D4',
-          animation: 'spin 0.8s linear infinite',
-        }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
     </div>
   )
 }
@@ -176,15 +113,12 @@ export default function Hero() {
 
   useEffect(() => {
     if (!wrapperRef.current) return
-    // wrapper = animazione (2*VH) + sezione (1*VH) = 3*VH
-    // calcolato con INITIAL_VH per matchare esattamente il loop JS
-    wrapperRef.current.style.height = isMobile
-      ? `${INITIAL_VH * 3}px`
-      : `${INITIAL_VH}px`
-  }, [isMobile])
+    // SCROLL_RANGE + 1vh = total wrapper so user scrolls the full video before exiting
+    wrapperRef.current.style.height = `${SCROLL_RANGE + INITIAL_VH}px`
+  }, [])
 
   return (
-    <div ref={wrapperRef} style={{ height: isMobile ? `${INITIAL_VH * 3}px` : '100vh' }}>
+    <div ref={wrapperRef} style={{ height: `${SCROLL_RANGE + INITIAL_VH}px` }}>
     <section id="hero" style={{
       position: 'fixed', top: 0, left: 0, right: 0,
       height: `${INITIAL_VH}px`,
