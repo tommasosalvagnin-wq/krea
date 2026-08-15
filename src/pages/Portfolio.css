@@ -1,7 +1,7 @@
 /* ── Section ── */
 .pf-section {
   background: #07080d;
-  min-height: 450vh;
+  min-height: 520vh;
   border-top: 1px solid rgba(192, 200, 212, 0.06);
   position: relative;
 }
@@ -57,8 +57,12 @@
   position: relative;
   z-index: 2;
   perspective: 1600px;
-  perspective-origin: 50% 55%;
+  /* Centrato: il cilindro non ha più scorrimento verticale, quindi non
+     serve spostare il punto di fuga verso il basso */
+  perspective-origin: 50% 50%;
   overflow: visible;
+  /* Spazio per il "scorri" in fondo, così non ci finisce mai sotto una card */
+  padding-bottom: 56px;
 }
 
 /* ── Scene ── */
@@ -69,16 +73,22 @@
   align-items: center;
   justify-content: center;
   transform-style: preserve-3d;
+
+  /* Misura della card legata sia alla larghezza SIA all'altezza del viewport:
+     è questo che impedisce alle card di sporgere fuori dalla scena su schermi
+     bassi. Il raggio segue la larghezza, così i progetti restano distanziati
+     qualunque sia la dimensione della finestra. */
+  --pf-w: clamp(180px, min(26vw, 40vh), 340px);
+  --pf-h: calc(var(--pf-w) * 0.667);
+  --pf-radius: calc(var(--pf-w) * 1.02);
 }
 
-/* ── Outer wrap — translateY ── */
+/* ── Outer wrap ── */
 .pf-cylinder-wrap {
   position: relative;
   width: 0;
   height: 0;
   transform-style: preserve-3d;
-  will-change: transform;
-  transform: translateY(340px);
 }
 
 /* ── Cylinder — rotateY ── */
@@ -102,10 +112,10 @@
 /* ── Card ── */
 .pf-card {
   position: absolute;
-  width: clamp(200px, 28vw, 360px);
-  height: clamp(135px, 19vw, 240px);
-  margin-left: calc(clamp(200px, 28vw, 360px) / -2);
-  margin-top:  calc(clamp(135px, 19vw, 240px) / -2);
+  width:  var(--pf-w);
+  height: var(--pf-h);
+  margin-left: calc(var(--pf-w) / -2);
+  margin-top:  calc(var(--pf-h) / -2);
   border-radius: 14px;
   cursor: pointer;
   border: 1px solid rgba(192, 200, 212, 0.1);
@@ -151,6 +161,29 @@
 .pf-card:hover .pf-card-img {
   transform: scale(1.06);
   filter: brightness(0.78) saturate(1.05);
+}
+
+/* Targa di riserva quando il progetto non ha ancora un'anteprima:
+   basta aggiungere il file in public/images e l'immagine torna da sola */
+.pf-card-plate {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+    circle at 28% 22%,
+    color-mix(in srgb, var(--pf-accent) 34%, #0a0e18) 0%,
+    #070a11 68%
+  );
+}
+.pf-card-plate span {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(26px, 3.6vw, 52px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--pf-accent);
+  opacity: 0.32;
 }
 
 /* Overlay */
@@ -295,15 +328,47 @@
   pointer-events: none;
 }
 
-/* ── Mobile ── */
+/* ── Mobile: niente cilindro ──
+   Su schermo stretto il carosello 3D non può funzionare: con sei card il
+   raggio necessario porta quelle laterali oltre i bordi, e rimpicciolirle
+   quanto basterebbe (~155px) le renderebbe illeggibili. Qui le card
+   diventano una lista verticale — tutte visibili, nessuna tagliata. */
 @media (max-width: 640px) {
-  .pf-section  { min-height: unset; }
-  .pf-sticky   { position: static; height: auto; padding-bottom: 48px; }
-  .pf-scene-wrap { flex: none; height: 70vh; }
-  .pf-card {
-    width: clamp(200px, 78vw, 320px);
-    height: clamp(135px, 52vw, 215px);
-    margin-left: calc(clamp(200px, 78vw, 320px) / -2);
-    margin-top:  calc(clamp(135px, 52vw, 215px) / -2);
+  .pf-section    { min-height: unset; }
+  .pf-sticky     { position: static; height: auto; overflow: visible; padding-bottom: 40px; }
+  .pf-scene-wrap { flex: none; perspective: none; padding: 8px 20px 0; }
+  .pf-scene      { display: block; height: auto; transform-style: flat; }
+
+  .pf-cylinder-wrap,
+  .pf-cylinder {
+    width: auto;
+    height: auto;
+    display: grid;
+    gap: 16px;
+    transform-style: flat;
+    /* Vince sulla rotazione impostata inline dallo scroll */
+    transform: none !important;
   }
+
+  .pf-slot { position: static; width: auto; height: auto; transform-style: flat; }
+
+  .pf-card {
+    position: static;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    margin: 0;
+    /* Vince sia sul transform inline sia sull'inclinazione al tocco */
+    transform: none !important;
+  }
+
+  /* Lo sfondo KREA e il "scorri" appartengono alla scena 3D: qui non servono */
+  .pf-krea-bg,
+  .pf-scroll-cue { display: none; }
+}
+
+/* ── Chi preferisce meno movimento: niente inclinazione al passaggio del mouse ── */
+@media (prefers-reduced-motion: reduce) {
+  .pf-card,
+  .pf-card-img { transition: none; }
 }

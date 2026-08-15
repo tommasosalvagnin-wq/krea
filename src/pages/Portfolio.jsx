@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './Portfolio.css'
 
 const projects = [
@@ -11,9 +11,6 @@ const projects = [
     color: '#C0A882',
     img: `${import.meta.env.BASE_URL}images/motoutlet.jpg`,
     link: 'https://motoutlet-pordenone-demo.netlify.app/',
-    num: '01',
-    angle: 0,
-    yOffset: -340,
   },
   {
     id: 'monolocale',
@@ -24,9 +21,6 @@ const projects = [
     color: '#8A9BB0',
     img: `${import.meta.env.BASE_URL}images/monolocale.jpg`,
     link: 'https://monolocale-padova-2026.netlify.app/',
-    num: '02',
-    angle: 90,
-    yOffset: -110,
   },
   {
     id: 'bisson',
@@ -37,9 +31,6 @@ const projects = [
     color: '#9BB08A',
     img: `${import.meta.env.BASE_URL}images/bisson.jpg`,
     link: 'https://bisson-auto.netlify.app/',
-    num: '03',
-    angle: 180,
-    yOffset: 110,
   },
   {
     id: 'mediacasa',
@@ -50,13 +41,34 @@ const projects = [
     color: '#CAE8E8',
     img: `${import.meta.env.BASE_URL}images/mediacasa.jpg`,
     link: 'https://mediacasaimmobiliare.com',
-    num: '04',
-    angle: 270,
-    yOffset: 340,
+  },
+  {
+    id: 'sordato',
+    title: 'Sordato',
+    tag: 'Industria',
+    year: '2026',
+    desc: 'Concept termocamera per impiantistica enologica, scroll orizzontale.',
+    color: '#009FE3',
+    img: `${import.meta.env.BASE_URL}images/sordato.jpg`,
+    link: 'https://sordato-concept.vercel.app',
+  },
+  {
+    id: 'tabula-rasa',
+    title: 'Tabula Rasa',
+    tag: 'Associazione',
+    year: '2026',
+    desc: 'Piattaforma tesseramento soci con form multi-step.',
+    color: '#D8C08A',
+    // Nessuna anteprima ancora: la card mostra la targa col colore del
+    // progetto. Per usare uno screenshot basta metterlo in public/images
+    // e aggiungere qui img: `${import.meta.env.BASE_URL}images/tabula-rasa.jpg`
+    link: 'https://tabula-rasa-theta-ebon.vercel.app/',
   },
 ]
 
-const RADIUS = 300
+// Giro completo distribuito sul numero di progetti: aggiungerne uno
+// non richiede di ritoccare angoli o rotazione a mano
+const STEP = 360 / projects.length
 
 function use3DTilt(ref) {
   useEffect(() => {
@@ -83,30 +95,49 @@ function use3DTilt(ref) {
   }, [])
 }
 
-function Card({ p }) {
+function Card({ p, index }) {
   const cardRef = useRef(null)
+  const [imgFailed, setImgFailed] = useState(false)
   use3DTilt(cardRef)
-  const baseTransform = `rotateY(${p.angle}deg) translateZ(${RADIUS}px) translateY(${p.yOffset}px)`
+
+  const angle = index * STEP
+  // Il raggio vive in CSS (dipende dalla larghezza della card, che è
+  // responsive): così la disposizione resta coerente a ogni viewport
+  const baseTransform = `rotateY(${angle}deg) translateZ(var(--pf-radius))`
+  const num = String(index + 1).padStart(2, '0')
+  const initials = p.title.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+
+  const open = () => window.open(p.link, '_blank', 'noopener,noreferrer')
 
   return (
-    <div className="pf-slot" style={{ '--angle': `${p.angle}deg`, '--y': `${p.yOffset}px` }}>
+    <div className="pf-slot">
       <div
         ref={cardRef}
         className="pf-card"
         data-base-transform={baseTransform}
-        data-angle={p.angle}
-        style={{ transform: baseTransform }}
-        onClick={() => window.open(p.link, '_blank', 'noopener,noreferrer')}
+        style={{ transform: baseTransform, '--pf-accent': p.color }}
+        onClick={open}
         role="link"
         tabIndex={0}
-        onKeyDown={e => e.key === 'Enter' && window.open(p.link, '_blank', 'noopener,noreferrer')}
+        onKeyDown={e => e.key === 'Enter' && open()}
         aria-label={`Apri ${p.title}`}
       >
         <div className="pf-card-face">
-          <img className="pf-card-img" src={p.img} alt={p.title} />
+          {(!p.img || imgFailed) ? (
+            // Nessuna anteprima: targa col colore del progetto. Vale sia per chi
+            // non ha ancora un'immagine sia per un file mancante o rotto.
+            <div className="pf-card-plate" aria-hidden="true"><span>{initials}</span></div>
+          ) : (
+            <img
+              className="pf-card-img"
+              src={p.img}
+              alt={p.title}
+              onError={() => setImgFailed(true)}
+            />
+          )}
           <div className="pf-card-overlay" />
           <div className="pf-card-top">
-            <span className="pf-card-num">{p.num}</span>
+            <span className="pf-card-num">{num}</span>
             <span className="pf-card-tag" style={{ color: p.color }}>{p.tag}</span>
             <span className="pf-card-year">{p.year}</span>
           </div>
@@ -122,32 +153,41 @@ function Card({ p }) {
 }
 
 export default function Portfolio() {
-  const sectionRef  = useRef(null)
-  const cylinderRef = useRef(null)
-  const rotorRef    = useRef(null)
+  const sectionRef = useRef(null)
+  const rotorRef   = useRef(null)
 
   useEffect(() => {
     const section = sectionRef.current
-    const wrap    = cylinderRef.current
     const rotor   = rotorRef.current
-    if (!section || !wrap || !rotor) return
+    if (!section || !rotor) return
 
-    const Y_START =  340
-    const Y_END   = -340
+    let ticking = false
 
-    const onScroll = () => {
+    const update = () => {
+      ticking = false
       const rect      = section.getBoundingClientRect()
       const maxScroll = section.offsetHeight - window.innerHeight
-      const scrolled  = Math.max(0, -rect.top)
-      const progress  = Math.min(1, scrolled / maxScroll)
+      // Se la sezione non è più alta del viewport non c'è corsa da mappare:
+      // senza questa guardia la divisione produce un progresso negativo o NaN
+      if (maxScroll <= 0) { rotor.style.transform = 'rotateY(0deg)' ; return }
+      const scrolled = Math.min(Math.max(0, -rect.top), maxScroll)
+      const progress = scrolled / maxScroll
+      rotor.style.transform = `rotateY(${-progress * 360}deg)`
+    }
 
-      wrap.style.transform  = `translateY(${Y_START + progress * (Y_END - Y_START)}px)`
-      rotor.style.transform = `rotateY(${-progress * 720}deg)`
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(update)
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
+    window.addEventListener('resize', onScroll, { passive: true })
+    update()
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
   }, [])
 
   return (
@@ -179,9 +219,9 @@ export default function Portfolio() {
         <div className="pf-scene-wrap">
           <div className="pf-krea-bg" aria-hidden="true">KREA</div>
           <div className="pf-scene">
-            <div className="pf-cylinder-wrap" ref={cylinderRef}>
+            <div className="pf-cylinder-wrap">
               <div className="pf-cylinder" ref={rotorRef}>
-                {projects.map(p => <Card key={p.id} p={p} />)}
+                {projects.map((p, i) => <Card key={p.id} p={p} index={i} />)}
               </div>
             </div>
           </div>
