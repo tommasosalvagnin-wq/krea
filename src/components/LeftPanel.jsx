@@ -51,8 +51,8 @@ export default function LeftPanel({ mobile = false }) {
         fontSize: 14, lineHeight: 1.75, fontWeight: 450,
         marginBottom: mobile ? 20 : 32, maxWidth: 340,
       }}>
-        Siti 3D, video generati con AI e menu digitali per concessionarie,
-        ristoranti e agenzie immobiliari.
+        Siti 3D, video e menu digitali. Costruiti sulla tua attività,
+        non su un template.
       </p>
 
       {/* CTAs */}
