@@ -1,8 +1,14 @@
 name: Deploy to GitHub Pages
 
+# Solo manuale, dalla scheda Actions del repo.
+#
+# L'indirizzo pubblico del sito e' quello su Vercel
+# (https://krea-agency-psi.vercel.app), aggiornato in automatico dal push.
+# Con questo workflow legato al push circolavano due indirizzi diversi dello
+# stesso sito, con il rischio di mandarne in giro uno e aggiornare l'altro.
+# Il workflow resta qui perche' Pages e' una riserva utile se Vercel e' giu'.
 on:
-  push:
-    branches: [master]
+  workflow_dispatch:
 
 permissions:
   contents: read

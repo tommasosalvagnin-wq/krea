@@ -1,0 +1,7 @@
+# Netlify serve dalla radice, ma vite.config.js imposta base '/krea/' quando
+# NODE_ENV e' production — corretto per GitHub Pages, sbagliato qui: senza
+# questo override gli asset verrebbero cercati sotto /krea/ e il sito uscirebbe
+# bianco. Stesso motivo per cui esiste vercel.json.
+[build]
+  command = "npx vite build --base=/"
+  publish = "dist"
