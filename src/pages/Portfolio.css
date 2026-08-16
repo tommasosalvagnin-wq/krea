@@ -81,6 +81,11 @@
   --pf-w: clamp(180px, min(26vw, 40vh), 340px);
   --pf-h: calc(var(--pf-w) * 0.667);
   --pf-radius: calc(var(--pf-w) * 1.02);
+
+  /* Sfalsamento verticale: in fila le card sembrano un listino. Il valore
+     segue l'altezza della card ma è tetto in vh, altrimenti su schermi bassi
+     si riprenderebbe il margine che le tiene dentro lo schermo */
+  --pf-stagger: min(calc(var(--pf-h) * 0.34), 4.5vh);
 }
 
 /* ── Outer wrap ── */

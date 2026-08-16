@@ -101,9 +101,13 @@ function Card({ p, index }) {
   use3DTilt(cardRef)
 
   const angle = index * STEP
-  // Il raggio vive in CSS (dipende dalla larghezza della card, che è
-  // responsive): così la disposizione resta coerente a ogni viewport
-  const baseTransform = `rotateY(${angle}deg) translateZ(var(--pf-radius))`
+  // Una sopra e una sotto, alternate: sfalsate danno profondità al cilindro,
+  // allineate sembrano un listino
+  const verso = index % 2 === 0 ? -1 : 1
+  // Raggio e sfalsamento vivono in CSS (dipendono dalla larghezza della card,
+  // che è responsive): così la disposizione resta coerente a ogni viewport
+  const baseTransform =
+    `rotateY(${angle}deg) translateZ(var(--pf-radius)) translateY(calc(var(--pf-stagger) * ${verso}))`
   const num = String(index + 1).padStart(2, '0')
   const initials = p.title.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
