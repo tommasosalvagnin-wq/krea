@@ -40,7 +40,7 @@ const projects = [
     desc: 'Redesign editoriale con tour virtuali AI e calcolatore mutuo.',
     color: '#CAE8E8',
     img: `${import.meta.env.BASE_URL}images/mediacasa.jpg`,
-    link: 'https://mediacasaimmobiliare.com',
+    link: 'https://mediacasa-sito.vercel.app/',
   },
   {
     id: 'sordato',
