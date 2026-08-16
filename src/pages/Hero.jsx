@@ -1,6 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
 import LeftPanel  from '../components/LeftPanel'
-import RightPanel from '../components/RightPanel'
 import { useWindowSize } from '../hooks/useWindowSize'
 import { BREAKPOINTS } from '../utils/constants'
 
@@ -12,6 +11,10 @@ const SMOOTHING = 9
 const FRAME_DURATION = 1 / 24
 // Sotto questa differenza consideriamo lo scrub fermo e mettiamo in pausa il loop
 const SETTLE_EPSILON = 0.0004
+// Quanto filmato serve in memoria prima di alzare il sipario. Non serve tutto:
+// percorrere la hero richiede tre schermate di scroll, e il resto del video
+// continua ad arrivare nel frattempo
+const SOGLIA_BUFFER = 0.35
 
 const reducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -121,15 +124,64 @@ export default function Hero() {
       if (played) played.then(() => video.pause()).catch(() => {})
     }
 
+    // ── Dialogo col sipario in index.html ──
+    // Il sipario resta chiuso finché lo scrub non è davvero fluido, ed è
+    // questa misura a dirglielo: quanto filmato il browser ha già in pancia
+    const bufferedFraction = () => {
+      if (!video.duration || !video.buffered.length) return 0
+      let end = 0
+      for (let i = 0; i < video.buffered.length; i++) end = Math.max(end, video.buffered.end(i))
+      return Math.min(end / video.duration, 1)
+    }
+
+    let annunciato = false
+    let sonda = null
+    const announceReady = () => {
+      if (annunciato) return
+      annunciato = true
+      if (sonda) { clearInterval(sonda); sonda = null }
+      window.dispatchEvent(new Event('krea:hero-ready'))
+    }
+
+    const reportProgress = () => {
+      const f = bufferedFraction()
+      // Normalizzato sulla soglia, non sull'intero filmato: così la barra tocca
+      // il fondo proprio quando il sipario si apre, invece di fermarsi a metà
+      // strada e poi saltare a cento
+      window.dispatchEvent(new CustomEvent('krea:hero-progress', {
+        detail: Math.min(f / SOGLIA_BUFFER, 1),
+      }))
+      // readyState 3 = ci sono fotogrammi oltre quello corrente
+      if (video.readyState >= 3 && f >= SOGLIA_BUFFER) announceReady()
+    }
+
+    // Un video già in cache può non emettere nessun 'progress': la sonda copre quel caso
+    sonda = setInterval(reportProgress, 250)
+    video.addEventListener('progress', reportProgress)
+    video.addEventListener('loadeddata', reportProgress)
+    video.addEventListener('canplaythrough', announceReady)
+    // Se il video non arriva, il sipario non deve restare chiuso ad aspettarlo
+    video.addEventListener('error', announceReady)
+
     applyHeight()
     readScroll()
 
+    const scollega = () => {
+      if (sonda) { clearInterval(sonda); sonda = null }
+      video.removeEventListener('progress', reportProgress)
+      video.removeEventListener('loadeddata', reportProgress)
+      video.removeEventListener('canplaythrough', announceReady)
+      video.removeEventListener('error', announceReady)
+    }
+
     if (reduced) {
-      // Niente scrub: primo fotogramma fisso e hero alta un solo schermo
+      // Niente scrub: primo fotogramma fisso e hero alta un solo schermo.
+      // Non c'è nulla da bufferizzare, quindi il sipario può aprirsi subito
       if (video.readyState >= 1) { video.pause(); video.currentTime = 0; setReady(true) }
       else video.addEventListener('loadedmetadata', () => { video.pause(); setReady(true) }, { once: true })
+      announceReady()
       window.addEventListener('resize', onResize, { passive: true })
-      return () => window.removeEventListener('resize', onResize)
+      return () => { scollega(); window.removeEventListener('resize', onResize) }
     }
 
     video.addEventListener('loadedmetadata', onReady)
@@ -139,6 +191,7 @@ export default function Hero() {
 
     return () => {
       if (rafId != null) cancelAnimationFrame(rafId)
+      scollega()
       video.removeEventListener('loadedmetadata', onReady)
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onResize)
@@ -202,19 +255,16 @@ export default function Hero() {
             </div>
           </>
         ) : isTablet ? (
-          <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'flex-end', padding: '0 0 48px' }}>
-            <LeftPanel /><RightPanel />
+          <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'grid', gridTemplateColumns: '1fr', alignItems: 'flex-end', padding: '0 0 48px' }}>
+            <LeftPanel />
           </div>
         ) : (
-          <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'grid', gridTemplateColumns: '30% 40% 30%', height: '100%' }}>
+          <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'grid', gridTemplateColumns: '30% 70%', height: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'center', padding: '0 0 0 0' }}>
               <LeftPanel />
             </div>
-            {/* Colonna centrale vuota — il video si vede attraverso */}
+            {/* Resto della scena libero — il video si vede attraverso */}
             <div />
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <RightPanel />
-            </div>
           </div>
         )}
 

@@ -7,9 +7,120 @@
     <meta property="og:title" content="KREA Agency — Web 3D Premium" />
     <meta property="og:description" content="Siti 3D interattivi, video animati hyperealistici e menu digitali multilingue. Prezzi accessibili, qualità premium." />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#0f1428" />
+    <meta name="theme-color" content="#08111f" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>KREA Agency — Web 3D • Video • Menu Digitali</title>
+
+    <!-- Syne serve al sipario, che si disegna prima del bundle: se aspettasse
+         l'@import dentro il CSS compilato il titolo apparirebbe col ripiego -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@800&display=swap" />
+
+    <!-- Sipario d'ingresso — inline di proposito: deve dipingersi al primo byte,
+         senza aspettare né il CSS compilato né i 1,5 MB di bundle 3D -->
+    <style>
+      html.pre-lock, html.pre-lock body { overflow: hidden; height: 100%; }
+
+      #preloader {
+        position: fixed; inset: 0; z-index: 400;
+        pointer-events: none;
+        visibility: visible;
+        transition: visibility 0s linear 1.05s;
+      }
+      #preloader.is-done { visibility: hidden; }
+
+      /* 50.4% per lato: la sovrapposizione evita il filo chiaro al centro */
+      .pre-panel {
+        position: absolute; left: 0; right: 0;
+        height: 50.4%;
+        background: #08111f;
+        transition: transform 1s cubic-bezier(.76,0,.24,1);
+      }
+      .pre-panel--top    { top: 0; }
+      .pre-panel--bottom { bottom: 0; }
+      #preloader.is-done .pre-panel--top    { transform: translateY(-100%); }
+      #preloader.is-done .pre-panel--bottom { transform: translateY(100%); }
+
+      .pre-inner {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 16px;
+        transition: opacity .45s ease, transform .45s ease;
+      }
+      #preloader.is-done .pre-inner { opacity: 0; transform: translateY(-12px); }
+
+      .pre-rule {
+        width: 52px; height: 1px;
+        background: linear-gradient(90deg, transparent, #C0C8D4, transparent);
+        opacity: .55;
+      }
+
+      .pre-title {
+        display: flex;
+        font-family: 'Syne', sans-serif;
+        font-size: clamp(2rem, 9vw, 4.4rem);
+        font-weight: 800;
+        letter-spacing: .3em;
+        text-indent: .3em;
+        color: #E8ECF0;
+      }
+      /* Le stesse tinte del lettering KREA nel portfolio. Il colore pieno
+         resta come ripiego se il ritaglio sul testo non è supportato */
+      @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+        .pre-title {
+          background: linear-gradient(120deg, #c9a96e 0%, #e8d4a8 28%, #c8d0dc 54%, #9eafc0 78%, #c9a96e 100%);
+          -webkit-background-clip: text; background-clip: text;
+          -webkit-text-fill-color: transparent; color: transparent;
+        }
+      }
+      .pre-title span { display: inline-block; overflow: hidden; padding-bottom: .12em; }
+      .pre-title span > i {
+        display: inline-block; font-style: normal;
+        transform: translateY(115%);
+        animation: preLetter .75s cubic-bezier(.19,.9,.25,1) forwards;
+      }
+      @keyframes preLetter { to { transform: none; } }
+
+      .pre-sub {
+        font-size: .68rem;
+        letter-spacing: .32em;
+        text-transform: uppercase;
+        color: rgba(192,200,212,.5);
+        opacity: 0;
+        animation: preFade .8s ease .55s forwards;
+      }
+      @keyframes preFade { to { opacity: 1; } }
+
+      .pre-bar {
+        position: relative;
+        width: min(230px, 52vw); height: 1px;
+        margin-top: 6px;
+        background: rgba(192,200,212,.16);
+      }
+      .pre-bar i {
+        position: absolute; left: 50%; top: 0;
+        height: 100%; width: 0%;
+        transform: translateX(-50%);
+        background: linear-gradient(90deg, transparent, #C0C8D4, transparent);
+        transition: width .3s ease;
+      }
+
+      .pre-pct {
+        font-size: .64rem;
+        letter-spacing: .22em;
+        color: rgba(224,231,255,.38);
+        font-variant-numeric: tabular-nums;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .pre-panel, .pre-inner { transition: none; }
+        .pre-title span > i { animation: none; transform: none; }
+        .pre-sub { animation: none; opacity: 1; }
+      }
+    </style>
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -22,6 +133,109 @@
     </script>
   </head>
   <body>
+    <div id="preloader">
+      <div class="pre-panel pre-panel--top"></div>
+      <div class="pre-panel pre-panel--bottom"></div>
+      <div class="pre-inner">
+        <div class="pre-rule"></div>
+        <div class="pre-title" id="pre-title">KREA</div>
+        <div class="pre-sub">Premium Digital Agency</div>
+        <div class="pre-bar"><i id="pre-bar-fill"></i></div>
+        <div class="pre-pct" id="pre-pct">0%</div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var pre = document.getElementById('preloader');
+        if (!pre) return;
+
+        var root = document.documentElement;
+        root.classList.add('pre-lock');
+
+        // Il sipario deve rivelare la hero dal primo fotogramma: se il browser
+        // ripristinasse la posizione di scroll di una visita precedente si
+        // aprirebbe a metà pagina, con il video già a metà scrub
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+        var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var fill   = document.getElementById('pre-bar-fill');
+        var pctEl  = document.getElementById('pre-pct');
+        var title  = document.getElementById('pre-title');
+
+        // Ogni lettera sale da sotto la propria maschera
+        var text = title.textContent.trim();
+        title.textContent = '';
+        for (var i = 0; i < text.length; i++) {
+          var cell  = document.createElement('span');
+          var glyph = document.createElement('i');
+          glyph.textContent = text.charAt(i);
+          glyph.style.animationDelay = (i * 0.06).toFixed(3) + 's';
+          cell.appendChild(glyph);
+          title.appendChild(cell);
+        }
+
+        var TETTO_MS = 8000;   // oltre questo si apre comunque
+        // Con il video in cache la hero è pronta in poche centinaia di ms e il
+        // sipario si aprirebbe a metà della salita delle lettere. Questa soglia
+        // copre l'animazione (lettere ~1s, sottotitolo fino a 1,35s)
+        var MINIMO_MS = 1500;
+        var avvio    = Date.now();
+        var reale    = 0;      // buffering del video, riportato dalla hero
+        var mostrato = 0;      // non torna mai indietro
+        var chiuso   = false;
+
+        // La hero comunica quanto video ha in pancia
+        addEventListener('krea:hero-progress', function (e) {
+          var v = Number(e.detail);
+          if (!isNaN(v)) reale = Math.max(reale, Math.min(v, 1));
+        });
+        addEventListener('krea:hero-ready', function () { finisci('video pronto'); });
+
+        var battito = setInterval(function () {
+          var trascorso = (Date.now() - avvio) / TETTO_MS;
+          // Una salita legata al tempo tiene viva la barra anche prima che il
+          // video cominci a scaricare, ma si ferma al 90%: l'ultimo tratto lo
+          // concede solo il video davvero pronto
+          var minimo = Math.min(0.9, trascorso * 0.9);
+          mostrato = Math.max(mostrato, minimo, reale * 0.95);
+          disegna(mostrato);
+          if (Date.now() - avvio > TETTO_MS) finisci('tetto di tempo');
+        }, 100);
+
+        function disegna(v) {
+          fill.style.width = (v * 100).toFixed(1) + '%';
+          pctEl.textContent = Math.round(v * 100) + '%';
+        }
+
+        function finisci(motivo) {
+          if (chiuso) return;
+          var trascorso = Date.now() - avvio;
+          // Pronti troppo presto: si aspetta che l'animazione finisca il suo giro
+          if (!reduce && trascorso < MINIMO_MS) {
+            setTimeout(function () { finisci(motivo); }, MINIMO_MS - trascorso);
+            return;
+          }
+          chiuso = true;
+          clearInterval(battito);
+          // Lasciato a disposizione: dice da console dopo quanto si è aperto
+          // il sipario e chi l'ha aperto, senza dover strumentare il codice
+          window.__kreaIntro = { ms: Date.now() - avvio, motivo: motivo || 'ignoto' };
+          disegna(1);
+          scrollTo(0, 0);
+          setTimeout(function () {
+            pre.classList.add('is-done');
+            root.classList.remove('pre-lock');
+          }, reduce ? 0 : 380);
+        }
+
+        // Rete di sicurezza: se il bundle non parte, la hero non parlerà mai
+        addEventListener('load', function () {
+          setTimeout(function () { finisci('rete di sicurezza al load'); }, 5000);
+        });
+      })();
+    </script>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
