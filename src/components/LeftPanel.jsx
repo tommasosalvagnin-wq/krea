@@ -6,24 +6,6 @@ export default function LeftPanel({ mobile = false }) {
       display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
       height: mobile ? 'auto' : '100%',
     }}>
-      {/* Badge */}
-      <div style={{
-        display: 'inline-flex', alignItems: 'center', gap: 8,
-        padding: '6px 14px', borderRadius: 999,
-        border: '1px solid rgba(192,200,212,0.18)',
-        background: 'rgba(192,200,212,0.04)',
-        width: 'fit-content', marginBottom: mobile ? 16 : 24,
-      }}>
-        <span style={{
-          width: 6, height: 6, borderRadius: '50%', background: '#34d399',
-          boxShadow: '0 0 8px #34d399', display: 'inline-block',
-          animation: 'pulse-dot 2s ease-in-out infinite',
-        }} />
-        <span style={{ color: '#C0C8D4', fontSize: 10, fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase' }}>
-          Premium Digital Agency
-        </span>
-      </div>
-
       {/* Editorial stacked title */}
       <div style={{ marginBottom: mobile ? 20 : 28, lineHeight: 0.92 }}>
         <div style={{
@@ -69,8 +51,8 @@ export default function LeftPanel({ mobile = false }) {
         fontSize: 14, lineHeight: 1.75, fontWeight: 450,
         marginBottom: mobile ? 20 : 32, maxWidth: 340,
       }}>
-        Trasformiamo i tuoi servizi in clienti reali. Soluzioni
-        innovative, moderne e accessibili.
+        Siti 3D, video generati con AI e menu digitali per concessionarie,
+        ristoranti e agenzie immobiliari.
       </p>
 
       {/* CTAs */}

@@ -1,0 +1,8 @@
+# File presenti nel progetto ma non referenziati da nessun componente.
+# Non vengono caricati su Vercel: la dist completa sfiora i 96 MB, vicino al
+# limite di deploy. Restano nel repo, qui si escludono soltanto dall'upload.
+public/frames
+public/videos/full_video.mp4
+public/videos/laptop-seekable.mp4
+public/videos/laptop.mp4
+public/videos/dna.mp4
