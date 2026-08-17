@@ -46,6 +46,26 @@
   display: block;
 }
 
+/* TextPressure si dimensiona sulla larghezza del contenitore e su una riga
+   larga arriva a 380px, sfondando sopra la lista. Qui la misura viene
+   riportata a quella del titolo originale, identica a .wwd-title-solid.
+   Serve !important perché il componente scrive font-size inline */
+.wwd-title-pressure {
+  display: block;
+  width: 100%;
+  height: clamp(52px, 10vw, 120px);
+  overflow: hidden;
+}
+
+.wwd-title-pressure .text-pressure-title {
+  font-size: clamp(52px, 10vw, 120px) !important;
+  text-align: left !important;
+  letter-spacing: -2px;
+}
+
+/* Il titolo non deve rubare il cursore alla lista sotto */
+.wwd-title-pressure * { pointer-events: none; }
+
 /* ── List ── */
 .wwd-list {
   max-width: 1100px;

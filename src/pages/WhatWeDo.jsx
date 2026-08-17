@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import WavyLine from '../components/WavyLine'
+import TextPressure from '../components/TextPressure'
 import './WhatWeDo.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -86,7 +87,25 @@ export default function WhatWeDo() {
         <p className="wwd-label">Cosa facciamo</p>
         <h2 className="wwd-title">
           <span className="wwd-title-outline">I NOSTRI</span>
-          <span className="wwd-title-solid">SERVIZI</span>
+          {/* SERVIZI reagisce al mouse ingrassando le lettere vicine.
+              Solo l'asse peso: Syne non ha larghezza né corsivo */}
+          <span className="wwd-title-pressure" aria-label="Servizi">
+            <TextPressure
+              text="Servizi"
+              fontFamily="Syne"
+              flex={false}
+              width={false}
+              italic={false}
+              weight
+              weightMin={400}
+              weightMax={800}
+              alpha={false}
+              stroke={false}
+              textColor="#E8ECF0"
+              minFontSize={52}
+              maxFontSize={120}
+            />
+          </span>
         </h2>
       </div>
 
