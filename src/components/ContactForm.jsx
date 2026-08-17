@@ -42,13 +42,30 @@ const IconEdit = () => (
 function Field({ icon, label, textarea = false, inputProps = {}, shake = false }) {
   const boxRef = useRef(null)
 
-  // L'alone segue il mouse, il bordo si accende dal punto del click
+  // L'alone segue il mouse e il campo si sporge verso il cursore, come una
+  // calamita. È lo stesso mouse tracking che l'agenzia vende come servizio
   const onMove = (e) => {
     const el = boxRef.current
     if (!el) return
     const r = el.getBoundingClientRect()
-    el.style.setProperty('--kf-mx', `${e.clientX - r.left}px`)
-    el.style.setProperty('--kf-my', `${e.clientY - r.top}px`)
+    const x = e.clientX - r.left
+    const y = e.clientY - r.top
+    el.style.setProperty('--kf-mx', `${x}px`)
+    el.style.setProperty('--kf-my', `${y}px`)
+    // scostamento massimo 7px, proporzionale a quanto sei lontano dal centro
+    const dx = (x / r.width - 0.5) * 2
+    const dy = (y / r.height - 0.5) * 2
+    el.style.setProperty('--kf-tx', `${(dx * 7).toFixed(2)}px`)
+    el.style.setProperty('--kf-ty', `${(dy * 4).toFixed(2)}px`)
+    el.style.setProperty('--kf-rot', `${(dx * 0.5).toFixed(3)}deg`)
+  }
+
+  const onLeave = () => {
+    const el = boxRef.current
+    if (!el) return
+    el.style.setProperty('--kf-tx', '0px')
+    el.style.setProperty('--kf-ty', '0px')
+    el.style.setProperty('--kf-rot', '0deg')
   }
   const onDown = (e) => {
     const el = boxRef.current
@@ -65,6 +82,7 @@ function Field({ icon, label, textarea = false, inputProps = {}, shake = false }
       ref={boxRef}
       className={`kf-input-container${textarea ? ' kf-textarea' : ''}${shake ? ' kf-shake' : ''}`}
       onPointerMove={onMove}
+      onPointerLeave={onLeave}
       onPointerDown={onDown}
     >
       {icon}
@@ -77,11 +95,18 @@ function Field({ icon, label, textarea = false, inputProps = {}, shake = false }
 }
 
 export default function ContactForm() {
-  const { register, handleSubmit, formState: { errors }, reset } = useForm()
+  const { register, handleSubmit, watch, formState: { errors }, reset } = useForm()
   const [sent, setSent] = useState(false)
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState(null)
   const formRef = useRef(null)
+
+  // Quanto manca a poter inviare: il bottone si riempie di conseguenza
+  const vals = watch(['email', 'phone', 'company'])
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(vals[0] || '')
+  const fatti = [emailOk, !!(vals[1] || '').trim(), !!(vals[2] || '').trim()].filter(Boolean).length
+  const completamento = fatti / 3
+  const pronto = fatti === 3
 
   // Entrata scaglionata quando la sezione entra in vista
   useEffect(() => {
@@ -123,12 +148,14 @@ export default function ContactForm() {
   }
 
   if (sent) return (
-    <div className="krea-form" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-      <div className="kf-texture" />
-      <h3 style={{ fontSize: 22, fontWeight: 700, color: '#C0C8D4', margin: '0 0 10px' }}>Messaggio inviato!</h3>
-      <p style={{ color: 'rgba(192,200,212,0.6)', fontSize: 15, margin: 0 }}>
-        Ti risponderemo entro 24 ore.
-      </p>
+    <div className="krea-form kf-done" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
+      {/* La spunta si disegna da sola, poi il testo sale */}
+      <svg className="kf-check" width="64" height="64" viewBox="0 0 52 52" aria-hidden="true">
+        <circle className="kf-check-ring" cx="26" cy="26" r="23" fill="none" />
+        <path className="kf-check-mark" fill="none" d="M14 27 l8 8 l16 -17" />
+      </svg>
+      <h3 className="kf-done-title">Ricevuto</h3>
+      <p className="kf-done-sub">Ti rispondiamo entro 24 ore.</p>
     </div>
   )
 
@@ -185,8 +212,17 @@ export default function ContactForm() {
         </div>
 
         <div className="kf-row kf-submit">
-          <button type="submit" disabled={sending}>
-            {sending ? 'Invio in corso...' : 'Invia il tuo progetto'}
+          <button
+            type="submit"
+            disabled={sending}
+            className={pronto ? 'is-ready' : ''}
+            style={{ '--kf-fill': completamento }}
+          >
+            {/* Il riempimento avanza con i campi obbligatori compilati */}
+            <span className="kf-fill" aria-hidden="true" />
+            <span className="kf-btn-text">
+              {sending ? 'Invio in corso…' : pronto ? 'Invia il tuo progetto' : `Compila i campi (${fatti}/3)`}
+            </span>
           </button>
         </div>
 

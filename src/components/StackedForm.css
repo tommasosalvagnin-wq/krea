@@ -15,11 +15,22 @@
   border-radius: 10px;
   border: 1px solid rgba(192, 200, 212, 0.12);
   background: rgba(255, 255, 255, 0.03);
-  transition: border-color 0.2s, background 0.2s;
   /* Posizione del cursore dentro al campo, aggiornata da JS */
   --kf-mx: 50%;
   --kf-my: 50%;
+  --kf-tx: 0px;
+  --kf-ty: 0px;
+  --kf-rot: 0deg;
+  /* Il campo si sporge verso il cursore: il ritorno è più lento
+     dell'andata, così sembra che abbia un peso */
+  transform: translate(var(--kf-tx), var(--kf-ty)) rotate(var(--kf-rot));
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+.kf-input-container:hover { transition-duration: 0.2s, 0.2s, 0.12s; }
 
 /* Alone che insegue il mouse sul campo sotto il cursore.
    Vive in un pseudo-elemento per non toccare il bordo vero */
@@ -83,11 +94,13 @@
 .kf-input-container svg {
   stroke: #4a5568;
   flex-shrink: 0;
-  transition: stroke 0.2s;
+  transition: stroke 0.2s, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* L'icona fa un saltello quando il campo prende il fuoco */
 .kf-input-container:focus-within svg {
   stroke: #C0C8D4;
+  transform: translateY(-2px) scale(1.14) rotate(-6deg);
 }
 
 /* ── Campo + etichetta mobile ── */
@@ -228,6 +241,73 @@ select.kf-input option {
 
 .kf-submit button:active:not(:disabled) { transform: scale(0.985); }
 
+/* Il riempimento avanza con i campi obbligatori completati */
+.kf-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(var(--kf-fill, 0));
+  background: linear-gradient(90deg, rgba(192, 200, 212, 0.10), rgba(192, 200, 212, 0.20));
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.kf-btn-text { position: relative; z-index: 1; }
+
+/* Quando è tutto pronto il bottone si accende e respira una volta */
+.kf-submit button.is-ready {
+  border-color: rgba(192, 200, 212, 0.55);
+  color: #E8ECF0;
+  animation: kf-ready 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes kf-ready {
+  40% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+/* ── Conferma: la spunta si disegna da sola ── */
+.kf-check { display: block; margin: 0 auto 18px; }
+
+.kf-check-ring {
+  stroke: rgba(192, 200, 212, 0.45);
+  stroke-width: 2;
+  stroke-dasharray: 145;
+  stroke-dashoffset: 145;
+  animation: kf-draw 0.7s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.kf-check-mark {
+  stroke: #C0C8D4;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 44;
+  stroke-dashoffset: 44;
+  animation: kf-draw 0.4s cubic-bezier(0.65, 0, 0.45, 1) 0.55s forwards;
+}
+
+@keyframes kf-draw { to { stroke-dashoffset: 0; } }
+
+.kf-done-title,
+.kf-done-sub {
+  opacity: 0;
+  animation: kf-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.kf-done-title {
+  font-size: 22px; font-weight: 700; color: #C0C8D4;
+  margin: 0 0 8px; animation-delay: 0.85s;
+}
+.kf-done-sub {
+  color: rgba(192, 200, 212, 0.6); font-size: 15px;
+  margin: 0; animation-delay: 0.98s;
+}
+
+@keyframes kf-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
 .kf-submit button:disabled {
   opacity: 0.5;
   cursor: wait;
@@ -253,7 +333,17 @@ select.kf-input option {
 @media (prefers-reduced-motion: reduce) {
   .kf-input-container::before,
   .kf-input-container::after,
-  .kf-submit button::after { transition: none; }
-  .kf-input-container.kf-shake { animation: none; }
+  .kf-submit button::after,
+  .kf-fill { transition: none; }
+  .kf-input-container {
+    transform: none;   /* niente calamita */
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .kf-input-container:focus-within svg { transform: none; }
+  .kf-input-container.kf-shake,
+  .kf-submit button.is-ready { animation: none; }
   .kf-label { transition: none; }
+  /* La spunta appare già disegnata */
+  .kf-check-ring, .kf-check-mark { animation: none; stroke-dashoffset: 0; }
+  .kf-done-title, .kf-done-sub { animation: none; opacity: 1; }
 }
