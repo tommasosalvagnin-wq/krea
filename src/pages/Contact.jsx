@@ -40,10 +40,10 @@ export default function Contact() {
             Parliamone
           </p>
           <h2 className="text-glow-title" style={{ fontSize: 'clamp(40px, 5vw, 58px)', fontWeight: 600, margin: '0 0 16px', lineHeight: 1.15, fontFamily: "'Cormorant Garant', Georgia, serif", letterSpacing: '0.01em' }}>
-            Raccontaci cosa ti serve
+            Cosa ti serve?
           </h2>
           <p className="text-glow-body" style={{ fontSize: 15, margin: 0, lineHeight: 1.7 }}>
-            Anche se hai solo un&apos;idea vaga. Rispondiamo entro 24 ore.
+            Anche solo un&apos;idea. Rispondiamo in 24 ore.
           </p>
         </div>
 
