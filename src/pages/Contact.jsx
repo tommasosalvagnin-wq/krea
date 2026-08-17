@@ -37,13 +37,13 @@ export default function Contact() {
       <div className="contact-inner" style={{ position: 'relative', zIndex: 2, maxWidth: 620, margin: '0 auto', opacity: 0 }}>
         <div style={{ textAlign: 'center', marginBottom: 'clamp(28px, 5vw, 52px)' }}>
           <p style={{ color: '#C0C8D4', fontSize: 11, fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 16 }}>
-            Inizia ora
+            Parliamone
           </p>
           <h2 className="text-glow-title" style={{ fontSize: 'clamp(40px, 5vw, 58px)', fontWeight: 600, margin: '0 0 16px', lineHeight: 1.15, fontFamily: "'Cormorant Garant', Georgia, serif", letterSpacing: '0.01em' }}>
-            Iniziamo il tuo progetto
+            Raccontaci cosa ti serve
           </h2>
           <p className="text-glow-body" style={{ fontSize: 15, margin: 0, lineHeight: 1.7 }}>
-            Raccontaci la tua idea. Ti risponderemo in 24 ore.
+            Anche se hai solo un&apos;idea vaga. Rispondiamo entro 24 ore.
           </p>
         </div>
 
