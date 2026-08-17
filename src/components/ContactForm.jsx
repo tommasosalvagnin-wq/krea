@@ -1,7 +1,11 @@
 import { useForm } from 'react-hook-form'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import emailjs from '@emailjs/browser'
 import './StackedForm.css'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const EJS_SERVICE  = 'service_jg4k4go'
 const EJS_TEMPLATE = 'template_1vadko8'
@@ -33,11 +37,68 @@ const IconEdit = () => (
   </svg>
 )
 
+/* Campo con etichetta che sale. L'input tiene placeholder=" " perché
+   :placeholder-shown è ciò che dice al CSS se il campo è vuoto */
+function Field({ icon, label, textarea = false, inputProps = {}, shake = false }) {
+  const boxRef = useRef(null)
+
+  // L'alone segue il mouse, il bordo si accende dal punto del click
+  const onMove = (e) => {
+    const el = boxRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    el.style.setProperty('--kf-mx', `${e.clientX - r.left}px`)
+    el.style.setProperty('--kf-my', `${e.clientY - r.top}px`)
+  }
+  const onDown = (e) => {
+    const el = boxRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    el.style.setProperty('--kf-x', `${e.clientX - r.left}px`)
+    el.style.setProperty('--kf-y', `${e.clientY - r.top}px`)
+  }
+
+  const Tag = textarea ? 'textarea' : 'input'
+
+  return (
+    <div
+      ref={boxRef}
+      className={`kf-input-container${textarea ? ' kf-textarea' : ''}${shake ? ' kf-shake' : ''}`}
+      onPointerMove={onMove}
+      onPointerDown={onDown}
+    >
+      {icon}
+      <div className="kf-field">
+        <Tag className="kf-input" placeholder=" " {...inputProps} />
+        <span className="kf-label">{label}</span>
+      </div>
+    </div>
+  )
+}
+
 export default function ContactForm() {
   const { register, handleSubmit, formState: { errors }, reset } = useForm()
   const [sent, setSent] = useState(false)
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState(null)
+  const formRef = useRef(null)
+
+  // Entrata scaglionata quando la sezione entra in vista
+  useEffect(() => {
+    if (!formRef.current) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const ctx = gsap.context(() => {
+      gsap.from('.kf-row', {
+        opacity: 0,
+        y: 26,
+        duration: 0.55,
+        ease: 'power2.out',
+        stagger: 0.08,
+        scrollTrigger: { trigger: formRef.current, start: 'top 85%' },
+      })
+    }, formRef)
+    return () => ctx.revert()
+  }, [sent])
 
   const onSubmit = async (data) => {
     setSending(true)
@@ -75,51 +136,55 @@ export default function ContactForm() {
     <div className="krea-form">
       <div className="kf-texture" />
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+      <form ref={formRef} onSubmit={handleSubmit(onSubmit)} noValidate style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
 
-        <div className="kf-input-container">
-          <IconMail />
-          <input className="kf-input" type="email" placeholder="Email *"
-            {...register('email', {
-              required: 'Email obbligatoria',
-              pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Email non valida' },
-            })} />
-        </div>
-        {errors.email && <span className="kf-error">{errors.email.message}</span>}
-
-        <div className="kf-input-container">
-          <IconPhone />
-          <input className="kf-input" type="tel" placeholder="WhatsApp *"
-            {...register('phone', { required: 'Telefono obbligatorio' })} />
-        </div>
-        {errors.phone && <span className="kf-error">{errors.phone.message}</span>}
-
-        <div className="kf-input-container">
-          <IconBuilding />
-          <input className="kf-input" type="text" placeholder="Nome Azienda *"
-            {...register('company', { required: 'Azienda obbligatoria' })} />
-        </div>
-        {errors.company && <span className="kf-error">{errors.company.message}</span>}
-
-        <div className="kf-input-container">
-          <IconList />
-          <select className="kf-input" {...register('service')}>
-            <option value="">Servizio di interesse...</option>
-            <option value="sito3d">Sito 3D</option>
-            <option value="video3d">Video 3D</option>
-            <option value="menu">Menu Digitale</option>
-            <option value="tutto">Tutto!</option>
-          </select>
+        <div className="kf-row">
+          <Field icon={<IconMail />} label="Email *" shake={!!errors.email}
+            inputProps={{
+              type: 'email',
+              ...register('email', {
+                required: 'Email obbligatoria',
+                pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Email non valida' },
+              }),
+            }} />
+          {errors.email && <span className="kf-error">{errors.email.message}</span>}
         </div>
 
-        <div className="kf-input-container kf-textarea">
-          <IconEdit />
-          <textarea className="kf-input" placeholder="Descrivi il tuo progetto..."
-            {...register('message', { maxLength: { value: 500, message: 'Max 500 caratteri' } })} />
+        <div className="kf-row">
+          <Field icon={<IconPhone />} label="WhatsApp *" shake={!!errors.phone}
+            inputProps={{ type: 'tel', ...register('phone', { required: 'Telefono obbligatorio' }) }} />
+          {errors.phone && <span className="kf-error">{errors.phone.message}</span>}
         </div>
-        {errors.message && <span className="kf-error">{errors.message.message}</span>}
 
-        <div className="kf-submit">
+        <div className="kf-row">
+          <Field icon={<IconBuilding />} label="Nome Azienda *" shake={!!errors.company}
+            inputProps={{ type: 'text', ...register('company', { required: 'Azienda obbligatoria' }) }} />
+          {errors.company && <span className="kf-error">{errors.company.message}</span>}
+        </div>
+
+        {/* Il select ha già la sua voce guida: niente etichetta mobile */}
+        <div className="kf-row">
+          <div className="kf-input-container">
+            <IconList />
+            <div className="kf-field">
+              <select className="kf-input" {...register('service')}>
+                <option value="">Servizio di interesse...</option>
+                <option value="sito3d">Sito 3D</option>
+                <option value="video3d">Video 3D</option>
+                <option value="menu">Menu Digitale</option>
+                <option value="tutto">Tutto!</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="kf-row">
+          <Field icon={<IconEdit />} label="Descrivi il tuo progetto..." textarea shake={!!errors.message}
+            inputProps={{ ...register('message', { maxLength: { value: 500, message: 'Max 500 caratteri' } }) }} />
+          {errors.message && <span className="kf-error">{errors.message.message}</span>}
+        </div>
+
+        <div className="kf-row kf-submit">
           <button type="submit" disabled={sending}>
             {sending ? 'Invio in corso...' : 'Invia il tuo progetto'}
           </button>
