@@ -47,12 +47,9 @@ export default function Contact() {
           </p>
         </div>
 
-        <div style={{
-          padding: 'clamp(24px, 5vw, 44px) clamp(16px, 5vw, 40px)',
-          borderRadius: 8,
-          border: '1px solid rgba(192,200,212,0.08)',
-          background: 'rgba(255,255,255,0.02)',
-        }}>
+        {/* Senza cornice né fondo: restano solo i campi, e la griglia si vede
+            passare dietro */}
+        <div style={{ padding: '0 clamp(4px, 2vw, 16px)' }}>
           <ContactForm />
         </div>
 
