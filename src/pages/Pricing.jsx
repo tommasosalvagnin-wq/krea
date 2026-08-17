@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import RotatingText from '../components/RotatingText'
 
 /* ─── DATA ─────────────────────────────────────────────── */
 
@@ -371,38 +372,51 @@ export default function Pricing() {
               cursor: default;
               margin: 0 0 16px;
             }
-            .hover-title .hover-text {
-              position: absolute;
-              box-sizing: border-box;
+            /* Titolo su una riga: parte fissa contornata, parte che ruota piena */
+            .pricing-rot-title {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: baseline;
+              justify-content: center;
+              gap: 0.3em;
+              -webkit-text-stroke: 0;
+              color: inherit;
+            }
+            .pricing-rot-static {
+              color: transparent;
+              -webkit-text-stroke: 1px var(--text-stroke-color);
+            }
+            /* La parte che cambia è piena, così si stacca dal contorno */
+            .pricing-rot {
               color: var(--animation-color);
-              width: 0%;
-              inset: 0;
-              border-right: var(--border-right) solid var(--animation-color);
+              -webkit-text-stroke: 0;
+              /* Le lettere escono dall'alto e dal basso: qui si tagliano */
               overflow: hidden;
-              transition: 0.5s;
-              -webkit-text-stroke: 1px var(--animation-color);
-              white-space: nowrap;
+              padding-bottom: 0.12em;
+              display: inline-flex;
+              justify-content: center;
             }
-            .hover-title:hover .hover-text {
-              width: 100%;
-              filter: drop-shadow(0 0 23px var(--animation-color));
+            @media (max-width: 560px) {
+              .pricing-rot-title { gap: 0.15em; }
             }
-            @media (hover: none) {
-              .hover-title {
-                color: var(--animation-color);
-                -webkit-text-stroke: 0;
-              }
-              .hover-title .hover-text { display: none; }
+            @media (prefers-reduced-motion: reduce) {
+              .pricing-rot .text-rotate-element { transition: none !important; }
             }
           `}</style>
-          <h2
-            className="hover-title"
-            data-text="Scegli il Servizio Giusto per Te"
-          >
-            Scegli il Servizio Giusto per Te
-            <span className="hover-text" aria-hidden="true">
-              Scegli il Servizio Giusto per Te
-            </span>
+          <h2 className="hover-title pricing-rot-title">
+            <span className="pricing-rot-static">Quanto costa</span>
+            <RotatingText
+              texts={['un sito 3D', 'un video AI', 'un menu digitale', 'il bundle']}
+              mainClassName="pricing-rot"
+              splitLevelClassName="pricing-rot-word"
+              staggerFrom="last"
+              staggerDuration={0.02}
+              initial={{ y: '100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '-120%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 380 }}
+              rotationInterval={2600}
+            />
           </h2>
         </>
       </div>
