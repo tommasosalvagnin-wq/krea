@@ -1,7 +1,41 @@
 import { useEffect, useRef, useState } from 'react'
 import './Portfolio.css'
 
+// L'ordine di questo elenco è l'ordine in cui si incontrano scorrendo:
+// numero, angolo sul cilindro e sfalsamento si ricalcolano da soli
 const projects = [
+  {
+    id: 'mediacasa',
+    title: 'MediaCasa Immobiliare',
+    tag: 'Immobiliare',
+    year: '2025',
+    desc: 'Redesign editoriale con tour virtuali AI e calcolatore mutuo.',
+    color: '#CAE8E8',
+    img: `${import.meta.env.BASE_URL}images/mediacasa.jpg`,
+    link: 'https://mediacasa-sito.vercel.app/',
+  },
+  {
+    id: 'tabula-rasa',
+    title: 'Tabula Rasa',
+    tag: 'Associazione',
+    year: '2026',
+    desc: 'Piattaforma tesseramento soci con form multi-step.',
+    color: '#D8C08A',
+    // Nessuna anteprima ancora: la card mostra la targa col colore del
+    // progetto. Per usare uno screenshot basta metterlo in public/images
+    // e aggiungere qui img: `${import.meta.env.BASE_URL}images/tabula-rasa.jpg`
+    link: 'https://tabula-rasa-theta-ebon.vercel.app/',
+  },
+  {
+    id: 'sordato',
+    title: 'Sordato',
+    tag: 'Industria',
+    year: '2026',
+    desc: 'Concept termocamera per impiantistica enologica, scroll orizzontale.',
+    color: '#009FE3',
+    img: `${import.meta.env.BASE_URL}images/sordato.jpg`,
+    link: 'https://sordato-concept.vercel.app',
+  },
   {
     id: 'motoutlet',
     title: 'MotOutlet',
@@ -31,38 +65,6 @@ const projects = [
     color: '#9BB08A',
     img: `${import.meta.env.BASE_URL}images/bisson.jpg`,
     link: 'https://bisson-auto.netlify.app/',
-  },
-  {
-    id: 'mediacasa',
-    title: 'MediaCasa Immobiliare',
-    tag: 'Immobiliare',
-    year: '2025',
-    desc: 'Redesign editoriale con tour virtuali AI e calcolatore mutuo.',
-    color: '#CAE8E8',
-    img: `${import.meta.env.BASE_URL}images/mediacasa.jpg`,
-    link: 'https://mediacasa-sito.vercel.app/',
-  },
-  {
-    id: 'sordato',
-    title: 'Sordato',
-    tag: 'Industria',
-    year: '2026',
-    desc: 'Concept termocamera per impiantistica enologica, scroll orizzontale.',
-    color: '#009FE3',
-    img: `${import.meta.env.BASE_URL}images/sordato.jpg`,
-    link: 'https://sordato-concept.vercel.app',
-  },
-  {
-    id: 'tabula-rasa',
-    title: 'Tabula Rasa',
-    tag: 'Associazione',
-    year: '2026',
-    desc: 'Piattaforma tesseramento soci con form multi-step.',
-    color: '#D8C08A',
-    // Nessuna anteprima ancora: la card mostra la targa col colore del
-    // progetto. Per usare uno screenshot basta metterlo in public/images
-    // e aggiungere qui img: `${import.meta.env.BASE_URL}images/tabula-rasa.jpg`
-    link: 'https://tabula-rasa-theta-ebon.vercel.app/',
   },
 ]
 
