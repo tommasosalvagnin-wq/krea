@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 .vercel
 .env*
+
+# elenco clienti profilati: resta sul PC, non nel repo
+lead-list.md
