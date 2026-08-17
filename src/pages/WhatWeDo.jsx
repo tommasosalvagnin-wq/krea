@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import WavyLine from '../components/WavyLine'
 import './WhatWeDo.css'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -43,8 +44,24 @@ const services = [
 export default function WhatWeDo() {
   const [active, setActive] = useState(null)
   const listRef = useRef(null)
+  // Ogni linea si registra qui: un solo ascoltatore le muove tutte, e le
+  // vicine si incurvano un po' anche loro
+  const linee = useRef([])
 
   const scrollToContact = () => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+
+  useEffect(() => {
+    const list = listRef.current
+    if (!list) return
+    const onMove = (e) => linee.current.forEach(fn => fn && fn(e.clientX, e.clientY))
+    const onLeave = () => linee.current.forEach(fn => fn && fn(null, null))
+    list.addEventListener('pointermove', onMove, { passive: true })
+    list.addEventListener('pointerleave', onLeave, { passive: true })
+    return () => {
+      list.removeEventListener('pointermove', onMove)
+      list.removeEventListener('pointerleave', onLeave)
+    }
+  }, [])
 
   // Le righe entrano una dopo l'altra quando la lista arriva in vista
   useEffect(() => {
@@ -86,6 +103,10 @@ export default function WhatWeDo() {
               if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActive(active === i ? null : i) }
             }}
           >
+            <WavyLine registro={linee} indice={i} attiva={active === i} />
+            {i === services.length - 1 && (
+              <WavyLine registro={linee} indice={services.length} fondo />
+            )}
             <div className="wwd-row-top">
               <span className="wwd-num">{s.num}</span>
               <span className="wwd-name">{s.name}</span>

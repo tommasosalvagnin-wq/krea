@@ -53,16 +53,36 @@
 
 .wwd-row {
   position: relative;
-  border-top: 1px solid rgba(192, 200, 212, 0.1);
   cursor: pointer;
   padding: 0 8px;
   border-radius: 4px;
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.wwd-row:last-child {
-  border-bottom: 1px solid rgba(192, 200, 212, 0.1);
+/* Le separazioni non sono più bordi ma tracciati SVG: un bordo non si piega.
+   La fascia è alta 40px e sta a cavallo del confine, senza intercettare i
+   click — il movimento del mouse lo ascolta la lista */
+.wwd-line {
+  position: absolute;
+  top: -20px;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 3;
 }
+
+.wwd-line path {
+  stroke: rgba(192, 200, 212, 0.16);
+  stroke-width: 1;
+  transition: stroke 0.3s ease;
+}
+
+.wwd-line.is-active path { stroke: rgba(192, 200, 212, 0.5); }
+
+/* L'ultima riga chiude la lista con una linea sotto */
+.wwd-line--fondo { top: auto; bottom: -20px; }
 
 /* Il fondo entra da sinistra invece di comparire tutto insieme */
 .wwd-row::before {
@@ -84,19 +104,6 @@
 .wwd-row:hover { transform: translateX(6px); }
 .wwd-row.is-active { transform: translateX(0); }
 
-/* Filo luminoso sul bordo superiore della riga aperta */
-.wwd-row::after {
-  content: '';
-  position: absolute;
-  top: -1px; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #C0C8D4, transparent);
-  transform: scaleX(0);
-  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  pointer-events: none;
-}
-
-.wwd-row.is-active::after { transform: scaleX(1); }
 
 /* ── Row top ── */
 .wwd-row-top {
