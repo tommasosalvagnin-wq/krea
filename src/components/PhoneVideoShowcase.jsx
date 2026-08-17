@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback, Suspense, useMemo } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 
@@ -39,6 +39,13 @@ function VideoScreen({ video }) {
   }, [video])
 
   useEffect(() => () => texture.dispose(), [texture])
+
+  // VideoTexture si aggiorna da sola solo via requestVideoFrameCallback, che
+  // su un elemento non attaccato al DOM non scatta in modo affidabile: senza
+  // questo il primo fotogramma resta congelato mentre l'audio va avanti
+  useFrame(() => {
+    if (video.readyState >= 2) texture.needsUpdate = true
+  })
 
   const alpha = useMemo(() => makeRoundedAlpha(0.88, 1.86, 0.13), [])
 
