@@ -1,5 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import './WhatWeDo.css'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const services = [
   {
@@ -38,8 +42,26 @@ const services = [
 
 export default function WhatWeDo() {
   const [active, setActive] = useState(null)
+  const listRef = useRef(null)
 
   const scrollToContact = () => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+
+  // Le righe entrano una dopo l'altra quando la lista arriva in vista
+  useEffect(() => {
+    if (!listRef.current) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const ctx = gsap.context(() => {
+      gsap.from('.wwd-row', {
+        opacity: 0,
+        y: 34,
+        duration: 0.6,
+        ease: 'power3.out',
+        stagger: 0.09,
+        scrollTrigger: { trigger: listRef.current, start: 'top 82%' },
+      })
+    }, listRef)
+    return () => ctx.revert()
+  }, [])
 
   return (
     <section id="services" className="wwd-section">
@@ -51,32 +73,39 @@ export default function WhatWeDo() {
         </h2>
       </div>
 
-      <div className="wwd-list">
+      <div className="wwd-list" ref={listRef}>
         {services.map((s, i) => (
           <div
             key={s.num}
             className={`wwd-row${active === i ? ' is-active' : ''}`}
             onClick={() => setActive(active === i ? null : i)}
+            role="button"
+            tabIndex={0}
+            aria-expanded={active === i}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActive(active === i ? null : i) }
+            }}
           >
             <div className="wwd-row-top">
               <span className="wwd-num">{s.num}</span>
               <span className="wwd-name">{s.name}</span>
               <span className="wwd-tag">{s.tag}</span>
               <span className="wwd-price">{s.price}</span>
-              <span className="wwd-chevron" aria-hidden="true">
-                {active === i ? '−' : '+'}
-              </span>
+              {/* Il segno è disegnato in CSS: ruotando, il "+" diventa "×" */}
+              <span className="wwd-chevron" aria-hidden="true" />
             </div>
             <div className="wwd-row-body">
-              <p className="wwd-desc">{s.desc}</p>
-              <div className="wwd-keywords">
-                {s.keywords.map(k => (
-                  <span key={k} className="wwd-kw">{k}</span>
-                ))}
+              <div className="wwd-body-inner">
+                <p className="wwd-desc">{s.desc}</p>
+                <div className="wwd-keywords">
+                  {s.keywords.map(k => (
+                    <span key={k} className="wwd-kw">{k}</span>
+                  ))}
+                </div>
+                <button className="wwd-cta" onClick={e => { e.stopPropagation(); scrollToContact() }}>
+                  Inizia ora <span aria-hidden="true">→</span>
+                </button>
               </div>
-              <button className="wwd-cta" onClick={e => { e.stopPropagation(); scrollToContact() }}>
-                Inizia ora →
-              </button>
             </div>
           </div>
         ))}

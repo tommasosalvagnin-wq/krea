@@ -52,24 +52,55 @@
 }
 
 .wwd-row {
+  position: relative;
   border-top: 1px solid rgba(192, 200, 212, 0.1);
   cursor: pointer;
-  transition: background 0.25s ease;
   padding: 0 8px;
   border-radius: 4px;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .wwd-row:last-child {
   border-bottom: 1px solid rgba(192, 200, 212, 0.1);
 }
 
-.wwd-row:hover,
-.wwd-row.is-active {
-  background: rgba(192, 200, 212, 0.03);
+/* Il fondo entra da sinistra invece di comparire tutto insieme */
+.wwd-row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(192, 200, 212, 0.07), rgba(192, 200, 212, 0.02) 70%, transparent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
 }
+
+.wwd-row:hover::before,
+.wwd-row.is-active::before { transform: scaleX(1); }
+
+/* La riga sotto il mouse si scosta un poco: dà il senso di poterla premere */
+.wwd-row:hover { transform: translateX(6px); }
+.wwd-row.is-active { transform: translateX(0); }
+
+/* Filo luminoso sul bordo superiore della riga aperta */
+.wwd-row::after {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #C0C8D4, transparent);
+  transform: scaleX(0);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.wwd-row.is-active::after { transform: scaleX(1); }
 
 /* ── Row top ── */
 .wwd-row-top {
+  position: relative;
   display: flex;
   align-items: center;
   gap: clamp(12px, 3vw, 32px);
@@ -86,22 +117,36 @@
   letter-spacing: 0.1em;
   flex-shrink: 0;
   width: 28px;
+  transition: color 0.3s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+.wwd-row:hover .wwd-num,
+.wwd-row.is-active .wwd-num {
+  color: #C0C8D4;
+  transform: translateY(-3px);
+}
+
+/* Lama di luce che attraversa il nome all'hover. Il gradiente sta sul testo,
+   così funziona anche quando il nome va a capo su due righe */
 .wwd-name {
   font-family: 'Syne', sans-serif;
   font-size: clamp(22px, 4.5vw, 52px);
   font-weight: 900;
-  color: #E8ECF0;
   letter-spacing: -1px;
   flex: 1;
   line-height: 1;
-  transition: color 0.2s;
+  color: #E8ECF0;
+  background: linear-gradient(100deg, #E8ECF0 0%, #E8ECF0 35%, #ffffff 50%, #C0C8D4 65%, #C0C8D4 100%);
+  background-size: 260% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: background-position 0.75s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.wwd-row:hover .wwd-name {
-  color: #C0C8D4;
-}
+.wwd-row:hover .wwd-name,
+.wwd-row.is-active .wwd-name { background-position: 0 0; }
 
 .wwd-tag {
   font-size: 10px;
@@ -121,36 +166,64 @@
   flex-shrink: 0;
 }
 
+/* Il "+" ruota fino a diventare una "×": è sempre lo stesso segno */
 .wwd-chevron {
-  font-size: 22px;
-  color: rgba(192, 200, 212, 0.35);
+  position: relative;
   flex-shrink: 0;
   width: 28px;
-  text-align: right;
-  font-weight: 300;
-  transition: color 0.2s, transform 0.3s;
+  height: 28px;
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.wwd-row.is-active .wwd-chevron {
-  color: #C0C8D4;
+.wwd-chevron::before,
+.wwd-chevron::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  background: rgba(192, 200, 212, 0.45);
+  transition: background 0.3s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+.wwd-chevron::before { width: 15px; height: 1.5px; transform: translate(-50%, -50%); }
+.wwd-chevron::after  { width: 1.5px; height: 15px; transform: translate(-50%, -50%); }
 
-/* ── Row body (accordion) ── */
+.wwd-row:hover .wwd-chevron::before,
+.wwd-row:hover .wwd-chevron::after { background: #C0C8D4; }
+
+.wwd-row.is-active .wwd-chevron { transform: rotate(135deg); }
+.wwd-row.is-active .wwd-chevron::before,
+.wwd-row.is-active .wwd-chevron::after { background: #C0C8D4; }
+
+/* ── Apertura ──
+   grid-template-rows da 0fr a 1fr anima l'altezza reale del contenuto.
+   Il vecchio max-height:200px tagliava il testo sugli schermi stretti */
 .wwd-row-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.45s cubic-bezier(0.23, 1, 0.32, 1),
-              padding 0.35s ease,
-              opacity 0.3s ease;
-  padding-bottom: 0;
-  opacity: 0;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.wwd-row.is-active .wwd-row-body {
-  max-height: 200px;
-  padding-bottom: clamp(20px, 3vw, 32px);
-  opacity: 1;
+.wwd-row-body > .wwd-body-inner {
+  overflow: hidden;
+  min-height: 0;
 }
+
+.wwd-row.is-active .wwd-row-body { grid-template-rows: 1fr; }
+
+/* Il contenuto entra a scaglioni, non tutto insieme */
+.wwd-desc,
+.wwd-keywords .wwd-kw,
+.wwd-cta {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wwd-row.is-active .wwd-desc { opacity: 1; transform: none; transition-delay: 0.12s; }
+.wwd-row.is-active .wwd-kw   { opacity: 1; transform: none; }
+.wwd-row.is-active .wwd-kw:nth-child(1) { transition-delay: 0.20s; }
+.wwd-row.is-active .wwd-kw:nth-child(2) { transition-delay: 0.27s; }
+.wwd-row.is-active .wwd-kw:nth-child(3) { transition-delay: 0.34s; }
+.wwd-row.is-active .wwd-cta  { opacity: 1; transform: none; transition-delay: 0.42s; }
 
 .wwd-desc {
   font-size: clamp(14px, 1.8vw, 16px);
@@ -201,7 +274,38 @@
   border-color: #C0C8D4;
 }
 
+/* La freccia della CTA scatta avanti */
+.wwd-cta span { display: inline-block; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.wwd-cta:hover span { transform: translateX(5px); }
+
+/* Le targhette si sollevano una a una al passaggio */
+.wwd-kw { transition: border-color 0.25s ease, color 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.wwd-row.is-active .wwd-kw:hover {
+  border-color: rgba(192, 200, 212, 0.45);
+  color: #E8ECF0;
+  transform: translateY(-3px);
+}
+
 /* ── Tablet/Desktop: show tag ── */
 @media (min-width: 640px) {
   .wwd-tag { display: block; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wwd-row,
+  .wwd-row::before,
+  .wwd-row::after,
+  .wwd-num,
+  .wwd-name,
+  .wwd-chevron,
+  .wwd-chevron::before,
+  .wwd-chevron::after,
+  .wwd-desc,
+  .wwd-kw,
+  .wwd-cta,
+  .wwd-cta span { transition: none; }
+  .wwd-row:hover { transform: none; }
+  .wwd-row.is-active .wwd-desc,
+  .wwd-row.is-active .wwd-kw,
+  .wwd-row.is-active .wwd-cta { transition-delay: 0s; }
 }
