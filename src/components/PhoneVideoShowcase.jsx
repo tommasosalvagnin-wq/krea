@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, Suspense, useMemo } from 'react'
+import { useEffect, useState, useRef, useCallback, Suspense, useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei'
 import * as THREE from 'three'
@@ -111,37 +111,71 @@ export default function PhoneVideoShowcase() {
   }, [video])
 
   const toggleAudio = () => {
-    const v = video
-    if (!v) return
-    const acceso = v.muted
-    v.muted = !acceso
-    if (acceso) {
-      v.volume = 0.85
-      // Il click è il gesto che sblocca il suono; se il video era in pausa
-      // per qualche motivo, riparte qui
-      const p = v.play()
-      if (p) p.catch(() => {})
+    if (!video.muted) { spegni(); return }
+    // Si accende solo se il telefono è in vista
+    if (!inVista()) {
+      wrapRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      return
     }
-    setAudioOn(acceso)
+    video.muted = false
+    video.volume = 0.85
+    // Il click è il gesto che sblocca il suono; se il video era fermo
+    // per qualche motivo, riparte qui
+    const p = video.play()
+    if (p) p.catch(() => {})
+    setAudioOn(true)
   }
 
-  // Se la sezione esce dallo schermo il suono si spegne: sentire una voce
-  // mentre si sta leggendo tutt'altro è fastidioso
+  // Il suono esiste solo mentre il telefono è davvero davanti agli occhi.
+  // Appena scende sotto questa quota di visibilità si spegne: una voce che
+  // continua a parlare mentre si legge un'altra sezione è fastidiosa
+  const SOGLIA_VISIBILE = 0.5
+
+  const spegni = useCallback(() => {
+    if (video.muted) return
+    video.muted = true
+    setAudioOn(false)
+  }, [video])
+
   useEffect(() => {
     const wrap = wrapRef.current
     if (!wrap) return
+
     const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting || video.muted) return
+      if (video.muted) return
       // La voce dell'observer può arrivare in ritardo e descrivere una
-      // posizione già superata: senza questa controprova un click subito
-      // dopo uno scroll verrebbe annullato da una notifica vecchia
+      // posizione già superata: la controprova evita che una notifica
+      // vecchia annulli un click appena fatto
+      if (e.intersectionRatio >= SOGLIA_VISIBILE) return
       const r = wrap.getBoundingClientRect()
-      const fuori = r.bottom < 0 || r.top > window.innerHeight
-      if (fuori) { video.muted = true; setAudioOn(false) }
-    }, { threshold: 0.25 })
+      const alt = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0)
+      const quota = r.height > 0 ? Math.max(0, alt) / r.height : 0
+      if (quota < SOGLIA_VISIBILE) spegni()
+    }, { threshold: [0, 0.25, SOGLIA_VISIBILE, 0.75, 1] })
     io.observe(wrap)
-    return () => io.disconnect()
-  }, [video])
+
+    // Cambio scheda o finestra ridotta a icona: stesso trattamento
+    const onHidden = () => { if (document.hidden) spegni() }
+    document.addEventListener('visibilitychange', onHidden)
+    window.addEventListener('pagehide', spegni)
+
+    return () => {
+      io.disconnect()
+      document.removeEventListener('visibilitychange', onHidden)
+      window.removeEventListener('pagehide', spegni)
+    }
+  }, [video, spegni])
+
+  // Acceso solo se il telefono è in vista: senza questa guardia il pulsante
+  // resterebbe premibile anche con la sezione fuori campo (per esempio da
+  // tastiera, arrivandoci col tab)
+  const inVista = () => {
+    const wrap = wrapRef.current
+    if (!wrap) return false
+    const r = wrap.getBoundingClientRect()
+    const alt = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0)
+    return r.height > 0 && Math.max(0, alt) / r.height >= SOGLIA_VISIBILE
+  }
 
   return (
     <div ref={wrapRef} style={{
