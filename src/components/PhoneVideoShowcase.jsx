@@ -1,6 +1,6 @@
-import { useEffect, Suspense, useMemo } from 'react'
+import { useEffect, useState, useRef, Suspense, useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { useGLTF, OrbitControls, Environment, useVideoTexture } from '@react-three/drei'
+import { useGLTF, OrbitControls, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 
 /* Canvas alphaMap con angoli arrotondati — UV mapping corretto */
@@ -28,10 +28,17 @@ function makeRoundedAlpha(w, h, radius) {
 }
 
 /* ─── Video screen con PlaneGeometry (UV corretti) + alphaMap arrotondato ─── */
-function VideoScreen() {
-  const texture = useVideoTexture(`${import.meta.env.BASE_URL}videos/presenter.mp4`, {
-    muted: true, loop: true, start: true, crossOrigin: 'anonymous',
-  })
+function VideoScreen({ video }) {
+  // La texture è costruita a mano invece che con useVideoTexture: quello
+  // sospende finché il video non è pronto e tiene l'elemento per sé, mentre
+  // qui serve poterlo raggiungere per accendere l'audio
+  const texture = useMemo(() => {
+    const t = new THREE.VideoTexture(video)
+    t.colorSpace = THREE.SRGBColorSpace
+    return t
+  }, [video])
+
+  useEffect(() => () => texture.dispose(), [texture])
 
   const alpha = useMemo(() => makeRoundedAlpha(0.88, 1.86, 0.13), [])
 
@@ -49,7 +56,7 @@ function VideoScreen() {
   )
 }
 
-function PhoneModel() {
+function PhoneModel({ video }) {
   const { scene } = useGLTF(`${import.meta.env.BASE_URL}models/iphone-3d.glb`)
 
   useEffect(() => {
@@ -70,18 +77,74 @@ function PhoneModel() {
   return (
     <group>
       <primitive object={scene} />
-      <Suspense fallback={null}>
-        <VideoScreen />
-      </Suspense>
+      <VideoScreen video={video} />
     </group>
   )
 }
 
 export default function PhoneVideoShowcase() {
   const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 1.5) : 1
+  const wrapRef = useRef(null)
+  const [audioOn, setAudioOn] = useState(false)
+
+  // L'elemento video vive qui, non dentro la scena 3D: è il solo modo di
+  // avere in mano il controllo dell'audio. Parte muto perché senza un gesto
+  // dell'utente il browser blocca l'autoplay sonoro e non partirebbe affatto
+  const video = useMemo(() => {
+    const v = document.createElement('video')
+    v.src = `${import.meta.env.BASE_URL}videos/presenter.mp4`
+    v.loop = true
+    v.muted = true
+    v.playsInline = true
+    v.preload = 'auto'
+    v.crossOrigin = 'anonymous'
+    return v
+  }, [])
+
+  useEffect(() => {
+    const p = video.play()
+    if (p) p.catch(() => {})
+    // Solo pause: togliere la sorgente qui svuotava l'elemento, e con il
+    // doppio montaggio di StrictMode al secondo giro non c'era più niente
+    // da riprodurre
+    return () => video.pause()
+  }, [video])
+
+  const toggleAudio = () => {
+    const v = video
+    if (!v) return
+    const acceso = v.muted
+    v.muted = !acceso
+    if (acceso) {
+      v.volume = 0.85
+      // Il click è il gesto che sblocca il suono; se il video era in pausa
+      // per qualche motivo, riparte qui
+      const p = v.play()
+      if (p) p.catch(() => {})
+    }
+    setAudioOn(acceso)
+  }
+
+  // Se la sezione esce dallo schermo il suono si spegne: sentire una voce
+  // mentre si sta leggendo tutt'altro è fastidioso
+  useEffect(() => {
+    const wrap = wrapRef.current
+    if (!wrap) return
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting || video.muted) return
+      // La voce dell'observer può arrivare in ritardo e descrivere una
+      // posizione già superata: senza questa controprova un click subito
+      // dopo uno scroll verrebbe annullato da una notifica vecchia
+      const r = wrap.getBoundingClientRect()
+      const fuori = r.bottom < 0 || r.top > window.innerHeight
+      if (fuori) { video.muted = true; setAudioOn(false) }
+    }, { threshold: 0.25 })
+    io.observe(wrap)
+    return () => io.disconnect()
+  }, [video])
 
   return (
-    <div style={{
+    <div ref={wrapRef} style={{
       width: '100%',
       maxWidth: 390,
       aspectRatio: '9 / 16',
@@ -90,6 +153,35 @@ export default function PhoneVideoShowcase() {
       position: 'relative',
       background: 'radial-gradient(ellipse at center, #1a1f2e 0%, #0a0a0f 70%)',
     }}>
+      <style>{`
+        .pv-audio {
+          position: absolute;
+          left: 50%;
+          bottom: 14px;
+          transform: translateX(-50%);
+          z-index: 2;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 14px;
+          border-radius: 999px;
+          border: 1px solid rgba(192,200,212,0.22);
+          background: rgba(10,10,15,0.62);
+          backdrop-filter: blur(8px);
+          color: #C0C8D4;
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: border-color 0.2s, background 0.2s, color 0.2s;
+        }
+        .pv-audio svg { stroke: currentColor; flex-shrink: 0; }
+        .pv-audio:hover { border-color: rgba(192,200,212,0.5); color: #E8ECF0; background: rgba(10,10,15,0.8); }
+        .pv-audio:focus-visible { outline: 2px solid #C0C8D4; outline-offset: 2px; }
+        .pv-audio[aria-pressed="true"] { border-color: rgba(192,200,212,0.5); color: #E8ECF0; }
+      `}</style>
       <Canvas
         camera={{ position: [0, 0, 5], fov: 38 }}
         gl={{ antialias: true, alpha: true }}
@@ -102,7 +194,7 @@ export default function PhoneVideoShowcase() {
         <pointLight position={[0, 3, -5]}        intensity={1.2} color="#8A9BB0" />
 
         <Suspense fallback={null}>
-          <PhoneModel />
+          <PhoneModel video={video} />
           <Environment preset="city" />
         </Suspense>
 
@@ -115,6 +207,30 @@ export default function PhoneVideoShowcase() {
           maxPolarAngle={Math.PI / 1.7}
         />
       </Canvas>
+
+      {/* Il pulsante sta fuori dal Canvas: dev'essere un vero controllo
+          raggiungibile da tastiera, non un oggetto 3D */}
+      <button
+        type="button"
+        onClick={toggleAudio}
+        className="pv-audio"
+        aria-pressed={audioOn}
+        aria-label={audioOn ? 'Disattiva audio del video' : 'Attiva audio del video'}
+        title={audioOn ? 'Disattiva audio' : 'Attiva audio'}
+      >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M11 5 6 9H2v6h4l5 4V5z" />
+          {audioOn ? (
+            <>
+              <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+              <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+            </>
+          ) : (
+            <path d="M22 9l-6 6M16 9l6 6" />
+          )}
+        </svg>
+        <span>{audioOn ? 'Audio attivo' : 'Attiva audio'}</span>
+      </button>
     </div>
   )
 }
