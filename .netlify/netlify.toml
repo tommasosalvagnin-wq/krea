@@ -7,10 +7,10 @@ redirects = []
 [functions."*"]
 
 [build]
-publish = "C:\\Users\\Tommaso\\krea-agency\\dist"
-publishOrigin = "ui"
-commandOrigin = "ui"
-command = "npm run build"
+publish = "C:\\Users\\tomma\\Desktop\\01_PROGETTI\\KREA\\dist"
+publishOrigin = "config"
+commandOrigin = "config"
+command = "npx vite build --base=/"
 
 [build.environment]
 
